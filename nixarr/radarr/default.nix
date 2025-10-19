@@ -70,17 +70,17 @@ with lib; let
 
   allInstances = [baseInstance] ++ additionalInstances;
 
-  enabledInstances = filter (instance: instance.enable) allInstances;
+  enabledInstances = filter (instance: cfg.enable && instance.enable) allInstances;
 
   vpnInstances =
     filter (
-      instance: instance.enable && instance.vpnEnable
+      instance: cfg.enable && instance.enable && instance.vpnEnable
     )
     allInstances;
 
   openFirewallInstances =
     filter (
-      instance: instance.enable && instance.openFirewall
+      instance: cfg.enable && instance.enable && instance.openFirewall
     )
     allInstances;
 
