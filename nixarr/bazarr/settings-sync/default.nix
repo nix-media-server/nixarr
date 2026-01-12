@@ -23,9 +23,6 @@
   globals = config.util-nixarr.globals;
   cfg = nixarr.bazarr.settings-sync;
 
-  nixarr-utils = import ../../lib/utils.nix {inherit pkgs lib config;};
-  inherit (nixarr-utils) secretFileType;
-
   sync-settings = writePython3Bin "nixarr-sync-bazarr-settings" {
     libraries = [nixarr.nixarr-py.package];
     flakeIgnore = [
@@ -61,12 +58,12 @@
         default = false;
         description = "Whether to use SSL when connecting to Sonarr.";
       };
-      apikey = mkOption {
-        type = types.either types.str secretFileType;
-        default = {secret = "${nixarr.stateDir}/secrets/sonarr.api-key";};
-        defaultText = literalExpression ''{ secret = "''${nixarr.stateDir}/secrets/sonarr.api-key"; }'';
+      apiKeyFile = mkOption {
+        type = types.path;
+        default = "${nixarr.stateDir}/secrets/sonarr.api-key";
+        defaultText = literalExpression ''"''${nixarr.stateDir}/secrets/sonarr.api-key"'';
         description = ''
-          API key for Sonarr. Can be a string or a secret file reference.
+          Path to file containing the API key for Sonarr.
         '';
       };
       sync_only_monitored_series = mkOption {
@@ -105,12 +102,12 @@
         default = false;
         description = "Whether to use SSL when connecting to Radarr.";
       };
-      apikey = mkOption {
-        type = types.either types.str secretFileType;
-        default = {secret = "${nixarr.stateDir}/secrets/radarr.api-key";};
-        defaultText = literalExpression ''{ secret = "''${nixarr.stateDir}/secrets/radarr.api-key"; }'';
+      apiKeyFile = mkOption {
+        type = types.path;
+        default = "${nixarr.stateDir}/secrets/radarr.api-key";
+        defaultText = literalExpression ''"''${nixarr.stateDir}/secrets/radarr.api-key"'';
         description = ''
-          API key for Radarr. Can be a string or a secret file reference.
+          Path to file containing the API key for Radarr.
         '';
       };
       sync_only_monitored_movies = mkOption {
@@ -193,16 +190,8 @@ in {
               bazarr_base_url = "http://127.0.0.1:${toString nixarr.bazarr.port}";
               bazarr_api_key_file = "${nixarr.stateDir}/secrets/bazarr.api-key";
             }
-            // (
-              if cfg.sonarr.enable
-              then {sonarr = cfg.sonarr.config;}
-              else {}
-            )
-            // (
-              if cfg.radarr.enable
-              then {radarr = cfg.radarr.config;}
-              else {}
-            ));
+            // lib.optionalAttrs cfg.sonarr.enable {sonarr = cfg.sonarr.config;}
+            // lib.optionalAttrs cfg.radarr.enable {radarr = cfg.radarr.config;});
         in ''
           ${getExe sync-settings} --config-file ${config-file}
         '';

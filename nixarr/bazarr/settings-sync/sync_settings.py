@@ -8,8 +8,6 @@ import urllib.error
 
 import pydantic
 
-from nixarr_py.utils import expand_secret
-
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,7 +18,7 @@ class SonarrConfig(pydantic.BaseModel):
     port: int = 8989
     base_url: str = ""
     ssl: bool = False
-    apikey: str | dict[str, str] = ""
+    apiKeyFile: str = ""
     sync_only_monitored_series: bool = False
     sync_only_monitored_episodes: bool = False
 
@@ -32,7 +30,7 @@ class RadarrConfig(pydantic.BaseModel):
     port: int = 7878
     base_url: str = ""
     ssl: bool = False
-    apikey: str | dict[str, str] = ""
+    apiKeyFile: str = ""
     sync_only_monitored_movies: bool = False
 
     model_config = pydantic.ConfigDict(extra="allow")
@@ -93,10 +91,11 @@ def sync_sonarr(
     """Sync Sonarr settings to Bazarr."""
     logger.info("Syncing Sonarr configuration to Bazarr")
 
-    # Expand API key secret if needed
-    apikey = expand_secret(sonarr_config.apikey)
-    if isinstance(apikey, dict):
-        apikey = ""
+    # Read API key from file
+    apikey = ""
+    if sonarr_config.apiKeyFile:
+        with open(sonarr_config.apiKeyFile, "r", encoding="utf-8") as f:
+            apikey = f.read().strip()
 
     settings = {
         "settings-sonarr-ip": sonarr_config.ip,
@@ -121,10 +120,11 @@ def sync_radarr(
     """Sync Radarr settings to Bazarr."""
     logger.info("Syncing Radarr configuration to Bazarr")
 
-    # Expand API key secret if needed
-    apikey = expand_secret(radarr_config.apikey)
-    if isinstance(apikey, dict):
-        apikey = ""
+    # Read API key from file
+    apikey = ""
+    if radarr_config.apiKeyFile:
+        with open(radarr_config.apiKeyFile, "r", encoding="utf-8") as f:
+            apikey = f.read().strip()
 
     settings = {
         "settings-radarr-ip": radarr_config.ip,
