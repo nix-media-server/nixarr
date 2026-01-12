@@ -40,7 +40,7 @@
   in
     {
       bazarr = pkgs.writeShellScript "print-bazarr-api-key" ''
-        ${yq} -r .auth.apiKey '${serviceCfgFile.bazarr}'
+        ${yq} -r .auth.apikey '${serviceCfgFile.bazarr}'
       '';
       jellyseerr = pkgs.writeShellScript "print-jellyseerr-api-key" ''
         ${yq} -r .main.apiKey '${serviceCfgFile.jellyseerr}'
@@ -57,9 +57,35 @@
         ${xq} -r .Config.ApiKey '${serviceCfgFile.${arr}}'
       '');
 
+  mkBazarrLocalUrl = let
+    port = cfg.bazarr.port;
+  in "http://127.0.0.1:${toString port}";
+
+  waitForBazarr = pkgs.writeShellScript "wait-for-bazarr-init" ''
+    # First wait for Bazarr to respond on HTTP
+    ${nixarr-utils.waitForService {
+      service = "bazarr";
+      url = mkBazarrLocalUrl;
+    }}
+
+    # Then wait for the config file to be written and stable
+    # Bazarr writes its API key to the config file on first startup
+    config_file='${serviceCfgFile.bazarr}'
+    echo "Waiting for Bazarr config file to be created..."
+    while [ ! -f "$config_file" ]; do sleep 1; done
+
+    # Wait a bit more to ensure Bazarr has finished initialization
+    # and the API key in the config file is stable
+    echo "Config file found, waiting for Bazarr to finish initialization..."
+    sleep 3
+    echo "Bazarr initialization complete"
+  '';
+
   waitForService = serviceName:
     if elem serviceName arrServiceNames
     then waitForArrService {service = serviceName;}
+    else if serviceName == "bazarr"
+    then waitForBazarr
     else
       # TODO: wait for other services properly
       pkgs.writeShellScript "wait-for-${serviceName}-config" ''
