@@ -23,12 +23,14 @@ jobs:
   run-nix-build:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
+        uses: DeterminateSystems/nix-installer-action@v3
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
 
       - run: nix build
 
