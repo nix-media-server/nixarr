@@ -10,6 +10,7 @@
     literalExpression
     mkIf
     mkOption
+    optionalAttrs
     types
     ;
 
@@ -32,16 +33,9 @@
       base_url = mkArrLocalUrl serviceName;
       api_key_file = "${cfg.stateDir}/secrets/${serviceName}.api-key";
     });
-    jellyfin =
-      if cfg.jellyfin.enable
-      then {
-        jellyfin = {
-          base_url = "http://localhost:${builtins.toString cfg.jellyfin.port}";
-          username = cfg.jellyfin.settings-sync.username;
-          password_file = cfg.jellyfin.settings-sync.passwordFile;
-        };
-      }
-      else {};
+    jellyfin = optionalAttrs (cfg.jellyfin.enable && cfg.jellyfin.api.enable) {
+      jellyfin = cfg.jellyfin.api.nixarr-py-config;
+    };
   in
     arrs // jellyfin;
 
@@ -49,6 +43,8 @@
 
   package = pkgs.callPackage ./. {jellyfin = cfg.jellyfin.package;};
 in {
+  imports = [./jellyfin_api_module.nix];
+
   options.nixarr.nixarr-py = {
     package = mkOption {
       type = types.package;

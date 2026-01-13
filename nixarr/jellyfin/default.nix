@@ -10,8 +10,6 @@ with lib; let
   defaultPort = 8096;
   nixarr = config.nixarr;
 in {
-  imports = [./settings-sync];
-
   options.nixarr.jellyfin = {
     enable = mkOption {
       type = types.bool;

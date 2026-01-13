@@ -9,8 +9,6 @@ Example usage:
     ...     api_info = radarr.ApiInfoApi(client).get_api()
 """
 
-import uuid
-
 import jellyfin
 import lidarr
 import prowlarr
@@ -19,47 +17,24 @@ import readarr
 import sonarr
 import whisparr
 
-from nixarr_py.config import get_simple_service_config, get_jellyfin_config
-
-
-def jellyfin_client_unauthorized() -> jellyfin.ApiClient:
-    """Create an unauthorized Jellyfin API client configured for use with Nixarr.
-
-    Returns:
-        jellyfin.ApiClient: API client instance configured to connect to
-        the local Nixarr Jellyfin service without authentication.
-    """
-    cfg = get_jellyfin_config()
-    client = jellyfin.ApiClient(jellyfin.Configuration(host=cfg.base_url))
-    # Jellyfin won't allow more than one concurrent session with the same device
-    # ID, so we create a new one each time.
-    client.default_headers["Authorization"] = (
-        f'MediaBrowser Client="nixarr-py", Device="nixarr-py", DeviceId="{uuid.uuid4()}", Version=" "'
-    )
-
-    return client
+from nixarr_py.config import get_simple_service_config as _get_simple_service_config
+from nixarr_py.jellyfin_helpers import api_key_client as _jellyfin_api_key_client
 
 
 def jellyfin_client() -> jellyfin.ApiClient:
-    """Create a Jellyfin API client configured for use with Nixarr.
+    """Create a Jellyfin API client configured for use with Nixarr, using Nixarr's API key.
 
     Returns:
         jellyfin.ApiClient: API client instance configured to connect to
         the local Nixarr Jellyfin service.
+    Example:
+        >>> import jellyfin
+        >>> from nixarr_py.clients import jellyfin_client
+        >>> with jellyfin_client() as client:
+        ...     system_client = jellyfin.SystemApi(client)
+        ...     system_info = system_client.get_system_info()
     """
-    cfg = get_jellyfin_config()
-    with open(cfg.password_file, "r", encoding="utf-8") as f:
-        password = f.read().strip()
-    client = jellyfin_client_unauthorized()
-    auth = jellyfin.UserApi(client).authenticate_user_by_name(
-        jellyfin.AuthenticateUserByName(
-            username=cfg.username,
-            pw=password,
-        )
-    )
-    client.default_headers["Authorization"] += f', Token="{auth.access_token}"'
-
-    return client
+    return _jellyfin_api_key_client()
 
 
 def _make_arr_client(service: str, module):
@@ -72,7 +47,7 @@ def _make_arr_client(service: str, module):
     Returns:
         An ApiClient instance configured for the service.
     """
-    cfg = get_simple_service_config(service)
+    cfg = _get_simple_service_config(service)
 
     with open(cfg.api_key_file, "r", encoding="utf-8") as f:
         api_key = f.read().strip()
