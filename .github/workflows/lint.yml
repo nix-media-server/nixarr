@@ -20,7 +20,7 @@ jobs:
 
       - uses: DeterminateSystems/magic-nix-cache-action@v8
 
-      - run: nix fmt -- --check .
+      - run: nix fmt -- --no-cache --fail-on-change
 
   build-website:
     runs-on: ubuntu-24.04

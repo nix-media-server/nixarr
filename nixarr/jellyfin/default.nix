@@ -10,6 +10,8 @@ with lib; let
   defaultPort = 8096;
   nixarr = config.nixarr;
 in {
+  imports = [./settings-sync];
+
   options.nixarr.jellyfin = {
     enable = mkOption {
       type = types.bool;
@@ -23,6 +25,13 @@ in {
     };
 
     package = mkPackageOption pkgs "jellyfin" {};
+
+    port = mkOption {
+      type = types.port;
+      default = defaultPort;
+      readOnly = true; # The Jellyfin port is weirdly hard to change.
+      description = "Port for Jellyfin to use.";
+    };
 
     stateDir = mkOption {
       type = types.path;
@@ -45,8 +54,7 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.jellyfin.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
       description = "Open firewall for Jellyfin";
     };
@@ -210,7 +218,7 @@ in {
         virtualHosts."127.0.0.1:${builtins.toString defaultPort}" = mkIf cfg.vpn.enable {
           listen = [
             {
-              addr = "0.0.0.0";
+              addr = nixarr.vpn.proxyListenAddr;
               port = defaultPort;
             }
           ];

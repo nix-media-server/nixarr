@@ -1,0 +1,10 @@
+# Configuration for various tools to find the nixarr-py library path
+
+[tool.ty.environment]
+extra-paths = ["./nixarr/lib/nixarr-py"]
+
+[tool.pyright]
+extraPaths = ["./nixarr/lib/nixarr-py"]
+
+[tool.mypy]
+mypy_path = "./nixarr/lib/nixarr-py"

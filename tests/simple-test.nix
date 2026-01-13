@@ -28,6 +28,10 @@ pkgs.testers.nixosTest {
         privateTrackers.cross-seed.enable = true;
       };
 
+      # Note: qbittorrent and transmission are mutually exclusive
+      # (they share the same download directories)
+      # qbittorrent.enable = true;
+
       autobrr.enable = true;
       bazarr.enable = true;
       sonarr.enable = true;

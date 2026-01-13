@@ -36,6 +36,8 @@ in {
       recyclarr = 269;
       sabnzbd = 38;
       transmission = 70;
+      # 71 is reserved for postgres in nixpkgs
+      qbittorrent = 72;
       # Removed 2025-10-29
       # cross-seed = 183;
       whisparr = 272;
@@ -114,6 +116,10 @@ in {
     };
     transmission = {
       user = "transmission";
+      group = globals.libraryOwner.group;
+    };
+    qbittorrent = {
+      user = "qbittorrent";
       group = globals.libraryOwner.group;
     };
     cross-seed = {

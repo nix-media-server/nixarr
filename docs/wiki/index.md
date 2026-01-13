@@ -10,6 +10,7 @@ This is an index of existing articles:
 - **Examples**
   - **[Basic Example](/wiki/examples/example-1)**
   - **[Example Configuration Where Port Forwarding Is Not an Option](/wiki/examples/example-2)**
+  - **[Declarative Configuration Example](/wiki/examples/example-3)**
 - **[Setup the applications](/wiki/setup)**
 - **[Exposing Services Safely](/wiki/expose)**
 - **VPN**

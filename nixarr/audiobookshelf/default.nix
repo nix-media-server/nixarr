@@ -55,10 +55,16 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.audiobookshelf.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
       description = "Open firewall for Audiobookshelf";
+    };
+
+    host = mkOption {
+      description = "The host Audiobookshelf binds to.";
+      default = "127.0.0.1";
+      example = "0.0.0.0";
+      type = types.str;
     };
 
     vpn.enable = mkOption {
@@ -119,7 +125,7 @@ in {
     host =
       if cfg.vpn.enable
       then "192.168.15.1"
-      else "127.0.0.1";
+      else cfg.host;
   in
     mkIf (nixarr.enable && cfg.enable) {
       assertions = [
@@ -207,9 +213,14 @@ in {
         };
       };
 
-      networking.firewall = mkIf cfg.expose.https.enable {
-        allowedTCPPorts = [80 443];
-      };
+      networking.firewall = mkMerge [
+        (mkIf cfg.openFirewall {
+          allowedTCPPorts = [cfg.port];
+        })
+        (mkIf cfg.expose.https.enable {
+          allowedTCPPorts = [80 443];
+        })
+      ];
 
       util-nixarr.upnp = mkIf cfg.expose.https.upnp.enable {
         enable = true;
@@ -239,7 +250,7 @@ in {
           virtualHosts."127.0.0.1:${builtins.toString cfg.port}" = mkIf cfg.vpn.enable {
             listen = [
               {
-                addr = "0.0.0.0";
+                addr = nixarr.vpn.proxyListenAddr;
                 port = cfg.port;
               }
             ];
