@@ -1,0 +1,142 @@
+"""Sync Jellyfin users from declarative configuration."""
+
+import argparse
+import json
+import logging
+import pathlib
+from typing import Optional
+
+import jellyfin
+import pydantic
+
+from nixarr_py.clients import jellyfin_client
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+class UserConfig(pydantic.BaseModel):
+    name: str
+    passwordFile: Optional[pathlib.Path] = None
+    isAdministrator: bool = False
+
+
+class JellyfinUsersConfig(pydantic.BaseModel):
+    users: list[UserConfig] = []
+
+
+def sync_users(config: JellyfinUsersConfig, client: jellyfin.ApiClient) -> None:
+    """Sync users from configuration to Jellyfin.
+
+    Creates users that don't exist and updates passwords for existing users.
+    """
+    user_api = jellyfin.UserApi(client)
+
+    # Get existing users
+    existing_users = {u.name: u for u in user_api.get_users()}
+
+    for user_cfg in config.users:
+        password = None
+        if user_cfg.passwordFile:
+            try:
+                password = user_cfg.passwordFile.read_text().strip()
+            except Exception as e:
+                logger.error(
+                    f"Failed to read password file for user {user_cfg.name}: {e}"
+                )
+                continue
+
+        if user_cfg.name not in existing_users:
+            logger.info(f"Creating user '{user_cfg.name}'")
+            try:
+                new_user = user_api.create_user_by_name(
+                    jellyfin.CreateUserByName(name=user_cfg.name)
+                )
+
+                # Set password if provided
+                if password:
+                    user_api.update_user_password(
+                        user_id=new_user.id,
+                        update_user_password=jellyfin.UpdateUserPassword(
+                            new_pw=password
+                        )
+                    )
+
+                # Set admin status if needed
+                if user_cfg.isAdministrator:
+                    # Get current policy and update it
+                    policy = new_user.policy
+                    if policy:
+                        policy.is_administrator = True
+                        user_api.update_user_policy(
+                            user_id=new_user.id,
+                            user_policy=policy
+                        )
+
+                logger.info(f"Successfully created user '{user_cfg.name}'")
+            except Exception as e:
+                logger.error(f"Failed to create user '{user_cfg.name}': {e}")
+        else:
+            logger.info(f"User '{user_cfg.name}' already exists")
+            existing_user = existing_users[user_cfg.name]
+
+            # Update password if provided
+            if password:
+                try:
+                    user_api.update_user_password(
+                        user_id=existing_user.id,
+                        update_user_password=jellyfin.UpdateUserPassword(
+                            new_pw=password
+                        )
+                    )
+                    logger.info(f"Updated password for user '{user_cfg.name}'")
+                except Exception as e:
+                    logger.error(
+                        f"Failed to update password for user '{user_cfg.name}': {e}"
+                    )
+
+            # Update admin status if needed
+            current_is_admin = (
+                existing_user.policy and existing_user.policy.is_administrator
+            )
+            if user_cfg.isAdministrator != current_is_admin:
+                try:
+                    policy = existing_user.policy or jellyfin.UserPolicy()
+                    policy.is_administrator = user_cfg.isAdministrator
+                    user_api.update_user_policy(
+                        user_id=existing_user.id,
+                        user_policy=policy
+                    )
+                    logger.info(
+                        f"Updated admin status for user '{user_cfg.name}' "
+                        f"to {user_cfg.isAdministrator}"
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"Failed to update admin status for user '{user_cfg.name}': {e}"
+                    )
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Sync Jellyfin users")
+    parser.add_argument(
+        "--config-file",
+        type=pathlib.Path,
+        required=True,
+        help="Path to JSON config file containing users to sync"
+    )
+    args = parser.parse_args()
+
+    config_json = args.config_file.read_text()
+    config = JellyfinUsersConfig.model_validate(json.loads(config_json))
+
+    if not config.users:
+        logger.info("No users configured, nothing to do")
+        return
+
+    client = jellyfin_client()
+    sync_users(config, client)
+
+
+if __name__ == "__main__":
+    main()
