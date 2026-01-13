@@ -31,6 +31,7 @@ pkgs.testers.runNixOSTest {
 
       jellyfin = {
         enable = true;
+        api.enable = true;
       };
     };
 

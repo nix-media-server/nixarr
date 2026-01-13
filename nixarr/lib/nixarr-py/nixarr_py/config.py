@@ -14,6 +14,7 @@ from pydantic import BaseModel
 
 
 DEFAULT_CONFIG_PATH = "/etc/nixarr/nixarr-py.json"
+CONFIG_PATH: Path = Path(os.environ.get("NIXARR_PY_CONFIG_PATH", DEFAULT_CONFIG_PATH))
 
 
 class SimpleService(BaseModel):
@@ -23,8 +24,10 @@ class SimpleService(BaseModel):
 
 class Jellyfin(BaseModel):
     base_url: str
-    username: str
-    password_file: Path
+    admin_username: str
+    admin_password_file: Path
+    api_key_file: Path
+    device_uuid_file: Path
 
 
 class NixarrPyConfig(BaseModel):
@@ -37,9 +40,6 @@ class NixarrPyConfig(BaseModel):
     readarr: SimpleService | None = None
     sonarr: SimpleService | None = None
     whisparr: SimpleService | None = None
-
-
-CONFIG_PATH: Path = Path(os.environ.get("NIXARR_PY_CONFIG_PATH", DEFAULT_CONFIG_PATH))
 
 
 @cache
