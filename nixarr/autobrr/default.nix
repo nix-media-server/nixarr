@@ -46,6 +46,17 @@ in {
       '';
     };
 
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.autobrr.vpn.enable`)(#nixarr.autobrr.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Autobrr web ui.
+      '';
+    };
+
     settings = lib.mkOption {
       type = lib.types.submodule {freeformType = configFormat.type;};
       default = {
@@ -83,6 +94,13 @@ in {
         message = ''
           The nixarr.autobrr.vpn.enable option requires the
           nixarr.vpn.enable option to be set, but it was not.
+        '';
+      }
+      {
+        assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+        message = ''
+          The nixarr.autobrr.vpn.configureNginx option requires the
+          nixarr.autobrr.vpn.enable option to be set, but it was not.
         '';
       }
       {
@@ -177,7 +195,7 @@ in {
     };
 
     # Nginx proxy for VPN-confined service
-    services.nginx = mkIf cfg.vpn.enable {
+    services.nginx = mkIf cfg.vpn.configureNginx {
       enable = true;
       recommendedTlsSettings = true;
       recommendedOptimisation = true;

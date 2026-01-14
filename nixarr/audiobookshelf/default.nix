@@ -74,6 +74,17 @@ in {
       '';
     };
 
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.audiobookshelf.vpn.enable`)(#nixarr.audiobookshelf.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Audiobookshelf web ui.
+      '';
+    };
+
     expose = {
       https = {
         enable = mkOption {
@@ -135,6 +146,13 @@ in {
           message = ''
             The nixarr.audiobookshelf.vpn.enable option conflicts with the
             nixarr.audiobookshelf.expose.https.enable option. You cannot set both.
+          '';
+        }
+        {
+          assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+          message = ''
+            The nixarr.audiobookshelf.vpn.configureNginx option requires the
+            nixarr.audiobookshelf.vpn.enable option to be set, but it was not.
           '';
         }
         {
@@ -217,7 +235,7 @@ in {
       };
 
       services.nginx = mkMerge [
-        (mkIf (cfg.expose.https.enable || cfg.vpn.enable) {
+        (mkIf (cfg.expose.https.enable || cfg.vpn.configureNginx) {
           enable = true;
 
           recommendedTlsSettings = true;
@@ -235,7 +253,7 @@ in {
             };
           };
         })
-        (mkIf cfg.vpn.enable {
+        (mkIf cfg.vpn.configureNginx {
           virtualHosts."127.0.0.1:${builtins.toString cfg.port}" = mkIf cfg.vpn.enable {
             listen = [
               {

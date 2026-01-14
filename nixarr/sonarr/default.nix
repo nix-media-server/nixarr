@@ -65,6 +65,17 @@ in {
         Route Sonarr traffic through the VPN.
       '';
     };
+
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.sonarr.vpn.enable`)(#nixarr.sonarr.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Sonarr web ui.
+      '';
+    };
   };
 
   config = mkIf (nixarr.enable && cfg.enable) {
@@ -74,6 +85,13 @@ in {
         message = ''
           The nixarr.sonarr.vpn.enable option requires the
           nixarr.vpn.enable option to be set, but it was not.
+        '';
+      }
+      {
+        assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+        message = ''
+          The nixarr.sonarr.vpn.configureNginx option requires the
+          nixarr.sonarr.vpn.enable option to be set, but it was not.
         '';
       }
     ];
@@ -118,7 +136,7 @@ in {
       ];
     };
 
-    services.nginx = mkIf cfg.vpn.enable {
+    services.nginx = mkIf cfg.vpn.configureNginx {
       enable = true;
 
       recommendedTlsSettings = true;

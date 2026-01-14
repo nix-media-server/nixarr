@@ -96,6 +96,17 @@ in {
         Route SABnzbd traffic through the VPN.
       '';
     };
+
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.sabnzbd.vpn.enable`)(#nixarr.sabnzbd.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Sabnzbd web ui.
+      '';
+    };
   };
 
   config = let
@@ -185,6 +196,13 @@ in {
             nixarr.vpn.enable option to be set, but it was not.
           '';
         }
+        {
+          assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+          message = ''
+            The nixarr.sabnzbd.vpn.configureNginx option requires the
+            nixarr.sabnzbd.vpn.enable option to be set, but it was not.
+          '';
+        }
       ];
 
       users = {
@@ -246,7 +264,7 @@ in {
         ];
       };
 
-      services.nginx = mkIf cfg.vpn.enable {
+      services.nginx = mkIf cfg.vpn.configureNginx {
         enable = true;
 
         recommendedTlsSettings = true;

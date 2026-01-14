@@ -138,11 +138,9 @@ in {
       '';
     };
 
-    flood.enable = mkEnableOption "the flood web-UI for the transmission web-UI.";
-    
-    configureNginx = mkOption {
+    vpn.configureNginx = mkOption {
       type = types.bool;
-      default = true;
+      default = cfg.vpn.enable;
       example = false;
       description = ''
         **Required options:** [`nixarr.transmission.vpn.enable`)(#nixarr.transmission.vpn.enable)
@@ -150,6 +148,8 @@ in {
         Configure nginx as a reverse proxy for the transmission web ui.
       '';
     };
+
+    flood.enable = mkEnableOption "the flood web-UI for the transmission web-UI.";
 
     privateTrackers = {
       disableDhtPex = mkOption {
@@ -306,9 +306,9 @@ in {
         '';
       }
       {
-        assertion = cfg.configureNginx -> cfg.vpn.enable;
+        assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
         message = ''
-          The nixarr.transmission.configureNginx option requires the
+          The nixarr.transmission.vpn.configureNginx option requires the
           nixarr.transmission.vpn.enable option to be set, but it was not.
         '';
       }
@@ -477,7 +477,7 @@ in {
       ];
     };
 
-    services.nginx = mkIf cfg.configureNginx {
+    services.nginx = mkIf cfg.vpn.configureNginx {
       enable = true;
 
       recommendedTlsSettings = true;
