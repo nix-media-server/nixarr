@@ -90,6 +90,9 @@ in {
         Type = "simple";
         User = globals.bazarr.user;
         Group = globals.bazarr.group;
+        # Set UMask to 0002 so directories are created with group write permission (775)
+        # This allows other services in the media group (like Jellyfin) to modify files
+        UMask = "0002";
         SyslogIdentifier = "bazarr";
         ExecStart = pkgs.writeShellScript "start-bazarr" ''
           ${pkgs.bazarr}/bin/bazarr \
