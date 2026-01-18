@@ -36,12 +36,16 @@ print("testviewer: verified as non-administrator")
 cfg = get_jellyfin_config()
 unauth_client = jellyfin_client_unauthorized()
 
+# Create auth header required by Jellyfin
+auth_header = 'MediaBrowser Client="nixarr-py-test", Device="nixarr-py-test", DeviceId="test-device-id", Version="1"'
+
 # Try to authenticate as testadmin
 auth_result = jellyfin.UserApi(unauth_client).authenticate_user_by_name(
     jellyfin.AuthenticateUserByName(
         username="testadmin",
         pw="adminpass123",
-    )
+    ),
+    _headers={"Authorization": auth_header},
 )
 assert auth_result.access_token is not None, "Should be able to authenticate as testadmin"
 print("testadmin: password authentication successful")
@@ -52,7 +56,8 @@ auth_result2 = jellyfin.UserApi(unauth_client2).authenticate_user_by_name(
     jellyfin.AuthenticateUserByName(
         username="testviewer",
         pw="viewerpass456",
-    )
+    ),
+    _headers={"Authorization": auth_header},
 )
 assert auth_result2.access_token is not None, "Should be able to authenticate as testviewer"
 print("testviewer: password authentication successful")

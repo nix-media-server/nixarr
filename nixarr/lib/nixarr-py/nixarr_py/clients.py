@@ -50,8 +50,10 @@ def jellyfin_client_unauthorized() -> jellyfin.ApiClient:
         >>> import jellyfin
         >>> from nixarr_py.clients import jellyfin_client_unauthorized
         >>> with jellyfin_client_unauthorized() as client:
+        ...     auth_header = 'MediaBrowser Client="app", Device="device", DeviceId="id", Version="1"'
         ...     auth_result = jellyfin.UserApi(client).authenticate_user_by_name(
-        ...         jellyfin.AuthenticateUserByName(username="user", pw="password")
+        ...         jellyfin.AuthenticateUserByName(username="user", pw="password"),
+        ...         _headers={"Authorization": auth_header}
         ...     )
     """
     return _jellyfin_unauthenticated_client()

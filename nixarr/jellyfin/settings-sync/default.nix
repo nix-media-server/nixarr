@@ -35,6 +35,13 @@
     ];
   } (builtins.readFile ./sync_users.py);
 
+  sync-libraries = writePython3Bin "nixarr-sync-jellyfin-libraries" {
+    libraries = [nixarr-py];
+    flakeIgnore = [
+      "E501" # Line too long
+    ];
+  } (builtins.readFile ./sync_libraries.py);
+
   usersConfigFile = writeJSON "jellyfin-users.json" {
     users =
       map (u: {
@@ -44,12 +51,23 @@
       })
       jellyfin.users;
   };
+
+  librariesConfigFile = writeJSON "jellyfin-libraries.json" {
+    libraries =
+      map (l: {
+        name = l.name;
+        type = l.type;
+        paths = l.paths;
+        enabled = l.enable;
+      })
+      jellyfin.libraries;
+  };
 in {
   options = {};
 
   config = mkIf (nixarr.enable && jellyfin.enable) {
-    # Automatically enable the API when users are configured, since it's required
-    nixarr.jellyfin.api.enable = mkIf (jellyfin.users != []) (mkDefault true);
+    # Automatically enable the API when users or libraries are configured, since it's required
+    nixarr.jellyfin.api.enable = mkIf (jellyfin.users != [] || jellyfin.libraries != []) (mkDefault true);
 
     # User sync service - only created if users are configured
     systemd.services.jellyfin-users-sync = mkIf (jellyfin.users != []) {
@@ -65,6 +83,23 @@ in {
         RestartSec = "10s";
 
         ExecStart = "${getExe sync-users} --config-file ${usersConfigFile}";
+      };
+    };
+
+    # Library sync service - only created if libraries are configured
+    systemd.services.jellyfin-libraries-sync = mkIf (jellyfin.libraries != []) {
+      description = "Sync Jellyfin libraries from declarative configuration";
+      after = ["jellyfin-api.service"];
+      requires = ["jellyfin-api.service"];
+      wantedBy = ["multi-user.target"];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        Restart = "on-failure";
+        RestartSec = "10s";
+
+        ExecStart = "${getExe sync-libraries} --config-file ${librariesConfigFile}";
       };
     };
   };

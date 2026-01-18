@@ -58,6 +58,7 @@ def sync_users(config: JellyfinUsersConfig, client: jellyfin.ApiClient) -> None:
                     user_api.update_user_password(
                         user_id=new_user.id,
                         update_user_password=jellyfin.UpdateUserPassword(
+                            current_pw="",  # Empty for new users
                             new_pw=password
                         )
                     )
@@ -86,6 +87,7 @@ def sync_users(config: JellyfinUsersConfig, client: jellyfin.ApiClient) -> None:
                     user_api.update_user_password(
                         user_id=existing_user.id,
                         update_user_password=jellyfin.UpdateUserPassword(
+                            current_pw="",  # Empty when resetting as admin
                             new_pw=password
                         )
                     )
