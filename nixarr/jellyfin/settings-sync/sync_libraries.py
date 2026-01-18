@@ -50,7 +50,7 @@ def sync_libraries(config: JellyfinLibrariesConfig, client: jellyfin.ApiClient) 
         # The response might be a tuple or have an items attribute
         if isinstance(media_folders_response, tuple):
             media_folders = media_folders_response[0] if media_folders_response else []
-        elif hasattr(media_folders_response, 'items'):
+        elif hasattr(media_folders_response, "items"):
             media_folders = media_folders_response.items or []
         else:
             media_folders = media_folders_response or []
@@ -100,7 +100,9 @@ def sync_libraries(config: JellyfinLibrariesConfig, client: jellyfin.ApiClient) 
                 logger.error(f"Failed to create library '{lib_cfg.name}': {e}")
                 logger.exception(e)
         else:
-            logger.info(f"Library '{lib_cfg.name}' already exists - skipping path updates for now")
+            logger.info(
+                f"Library '{lib_cfg.name}' already exists - skipping path updates for now"
+            )
             # TODO: Implement path updates for existing libraries
 
 

@@ -14,7 +14,7 @@ media_folders_response = library_api.get_media_folders()
 # The response might be a tuple or have an items attribute
 if isinstance(media_folders_response, tuple):
     media_folders = media_folders_response[0] if media_folders_response else []
-elif hasattr(media_folders_response, 'items'):
+elif hasattr(media_folders_response, "items"):
     media_folders = media_folders_response.items or []
 else:
     media_folders = media_folders_response or []

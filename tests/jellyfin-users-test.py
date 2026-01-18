@@ -28,7 +28,9 @@ print("testadmin: verified as administrator")
 assert "testviewer" in users_by_name, "testviewer user should exist"
 testviewer = users_by_name["testviewer"]
 assert testviewer.policy is not None, "testviewer should have a policy"
-assert testviewer.policy.is_administrator is False, "testviewer should NOT be an administrator"
+assert testviewer.policy.is_administrator is False, (
+    "testviewer should NOT be an administrator"
+)
 print("testviewer: verified as non-administrator")
 
 # Verify we can authenticate as testadmin with the correct password
@@ -47,7 +49,9 @@ auth_result = jellyfin.UserApi(unauth_client).authenticate_user_by_name(
     ),
     _headers={"Authorization": auth_header},
 )
-assert auth_result.access_token is not None, "Should be able to authenticate as testadmin"
+assert auth_result.access_token is not None, (
+    "Should be able to authenticate as testadmin"
+)
 print("testadmin: password authentication successful")
 
 # Try to authenticate as testviewer
@@ -59,7 +63,9 @@ auth_result2 = jellyfin.UserApi(unauth_client2).authenticate_user_by_name(
     ),
     _headers={"Authorization": auth_header},
 )
-assert auth_result2.access_token is not None, "Should be able to authenticate as testviewer"
+assert auth_result2.access_token is not None, (
+    "Should be able to authenticate as testviewer"
+)
 print("testviewer: password authentication successful")
 
 print("\nAll Jellyfin users tests passed!")

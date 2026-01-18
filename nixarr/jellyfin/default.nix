@@ -144,10 +144,10 @@ in {
       ];
       description = ''
         List of Jellyfin users to create and manage declaratively.
-        
+
         Users defined here will be created if they don't exist, and their
         passwords will be updated if a passwordFile is provided.
-        
+
         Note: This requires the jellyfin-api service to be running, which
         handles initial setup and authentication.
       '';
@@ -198,10 +198,10 @@ in {
       ];
       description = ''
         List of Jellyfin libraries to create and manage declaratively.
-        
+
         Libraries defined here will be created if they don't exist, and their
         paths will be updated if they change.
-        
+
         Note: This requires the jellyfin-api service to be running, which
         handles initial setup and authentication.
       '';

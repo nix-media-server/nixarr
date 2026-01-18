@@ -59,8 +59,8 @@ def sync_users(config: JellyfinUsersConfig, client: jellyfin.ApiClient) -> None:
                         user_id=new_user.id,
                         update_user_password=jellyfin.UpdateUserPassword(
                             current_pw="",  # Empty for new users
-                            new_pw=password
-                        )
+                            new_pw=password,
+                        ),
                     )
 
                 # Set admin status if needed
@@ -70,8 +70,7 @@ def sync_users(config: JellyfinUsersConfig, client: jellyfin.ApiClient) -> None:
                     if policy:
                         policy.is_administrator = True
                         user_api.update_user_policy(
-                            user_id=new_user.id,
-                            user_policy=policy
+                            user_id=new_user.id, user_policy=policy
                         )
 
                 logger.info(f"Successfully created user '{user_cfg.name}'")
@@ -88,8 +87,8 @@ def sync_users(config: JellyfinUsersConfig, client: jellyfin.ApiClient) -> None:
                         user_id=existing_user.id,
                         update_user_password=jellyfin.UpdateUserPassword(
                             current_pw="",  # Empty when resetting as admin
-                            new_pw=password
-                        )
+                            new_pw=password,
+                        ),
                     )
                     logger.info(f"Updated password for user '{user_cfg.name}'")
                 except Exception as e:
@@ -106,8 +105,7 @@ def sync_users(config: JellyfinUsersConfig, client: jellyfin.ApiClient) -> None:
                     policy = existing_user.policy or jellyfin.UserPolicy()
                     policy.is_administrator = user_cfg.isAdministrator
                     user_api.update_user_policy(
-                        user_id=existing_user.id,
-                        user_policy=policy
+                        user_id=existing_user.id, user_policy=policy
                     )
                     logger.info(
                         f"Updated admin status for user '{user_cfg.name}' "
@@ -125,7 +123,7 @@ def main():
         "--config-file",
         type=pathlib.Path,
         required=True,
-        help="Path to JSON config file containing users to sync"
+        help="Path to JSON config file containing users to sync",
     )
     args = parser.parse_args()
 
