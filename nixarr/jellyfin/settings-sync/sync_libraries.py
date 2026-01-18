@@ -4,11 +4,14 @@ import argparse
 import json
 import logging
 import pathlib
+import urllib.parse
 
 import jellyfin
 import pydantic
+import requests
 
 from nixarr_py.clients import jellyfin_client
+from nixarr_py.config import get_jellyfin_config
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -37,10 +40,13 @@ def get_library_type_name(lib_type: str) -> str:
     return type_map.get(lib_type.lower(), "mixed")
 
 
-def sync_libraries(config: JellyfinLibrariesConfig, client: jellyfin.ApiClient) -> None:
+def sync_libraries(config: JellyfinLibrariesConfig, client: jellyfin.ApiClient) -> int:
     """Sync libraries from configuration to Jellyfin.
 
     Creates libraries that don't exist and updates paths for existing libraries.
+
+    Returns:
+        0 on success, 1 on failure
     """
     library_api = jellyfin.LibraryApi(client)
 
@@ -58,7 +64,9 @@ def sync_libraries(config: JellyfinLibrariesConfig, client: jellyfin.ApiClient) 
     except Exception as e:
         logger.error(f"Failed to get existing libraries: {e}")
         logger.exception(e)
-        return
+        return 1
+
+    errors = []
 
     for lib_cfg in config.libraries:
         # Convert paths to strings
@@ -74,36 +82,59 @@ def sync_libraries(config: JellyfinLibrariesConfig, client: jellyfin.ApiClient) 
                 try:
                     path.mkdir(parents=True, exist_ok=True)
                 except Exception as e:
-                    logger.error(f"Failed to create path {path}: {e}")
+                    error_msg = f"Failed to create path {path}: {e}"
+                    logger.error(error_msg)
+                    errors.append(error_msg)
                     continue
 
         if lib_cfg.name not in existing_libraries:
             logger.info(f"Creating library '{lib_cfg.name}' with type '{lib_cfg.type}'")
             try:
-                # Create the library using raw HTTP API
-                # Build query parameters - paths need to be a list
-                params = {
-                    "name": lib_cfg.name,
-                    "collectionType": get_library_type_name(lib_cfg.type),
-                    "refreshLibrary": "false",
-                    "paths": path_strings,
-                }
+                # Create the library using direct HTTP request
+                # The jellyfin SDK doesn't expose the virtual folders API properly
+                cfg = get_jellyfin_config()
+                with open(cfg.api_key_file, "r", encoding="utf-8") as f:
+                    api_key = f.read().strip()
 
-                # Make the POST request
-                client.call_api(
-                    resource_path="/Library/VirtualFolders",
-                    method="POST",
-                    query_params=params,
+                # Build query string with multiple paths parameters
+                query_parts = [
+                    f"name={urllib.parse.quote(lib_cfg.name)}",
+                    f"collectionType={get_library_type_name(lib_cfg.type)}",
+                    "refreshLibrary=false",
+                ]
+                for path in path_strings:
+                    query_parts.append(f"paths={urllib.parse.quote(path)}")
+
+                url = f"{cfg.base_url}/Library/VirtualFolders?{'&'.join(query_parts)}"
+
+                response = requests.post(
+                    url,
+                    headers={
+                        "X-Emby-Token": api_key,
+                        "Content-Type": "application/json",
+                    },
                 )
+                response.raise_for_status()
                 logger.info(f"Successfully created library '{lib_cfg.name}'")
             except Exception as e:
-                logger.error(f"Failed to create library '{lib_cfg.name}': {e}")
+                error_msg = f"Failed to create library '{lib_cfg.name}': {e}"
+                logger.error(error_msg)
                 logger.exception(e)
+                errors.append(error_msg)
         else:
             logger.info(
                 f"Library '{lib_cfg.name}' already exists - skipping path updates for now"
             )
             # TODO: Implement path updates for existing libraries
+
+    if errors:
+        logger.error(f"Library sync completed with {len(errors)} error(s):")
+        for error in errors:
+            logger.error(f"  - {error}")
+        return 1
+
+    logger.info("Library sync completed successfully")
+    return 0
 
 
 def main():
@@ -116,16 +147,27 @@ def main():
     )
     args = parser.parse_args()
 
-    config_json = args.config_file.read_text()
-    config = JellyfinLibrariesConfig.model_validate(json.loads(config_json))
+    try:
+        config_json = args.config_file.read_text()
+        config = JellyfinLibrariesConfig.model_validate(json.loads(config_json))
+    except Exception as e:
+        logger.error(f"Failed to load configuration: {e}")
+        logger.exception(e)
+        return 1
 
     if not config.libraries:
         logger.info("No libraries configured, nothing to do")
-        return
+        return 0
 
-    client = jellyfin_client()
-    sync_libraries(config, client)
+    try:
+        client = jellyfin_client()
+    except Exception as e:
+        logger.error(f"Failed to create Jellyfin client: {e}")
+        logger.exception(e)
+        return 1
+
+    return sync_libraries(config, client)
 
 
 if __name__ == "__main__":
-    main()
+    exit(main())
