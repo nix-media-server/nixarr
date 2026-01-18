@@ -43,7 +43,7 @@
   } (builtins.readFile ./sync_users.py);
 
   sync-libraries = writePython3Bin "nixarr-sync-jellyfin-libraries" {
-    libraries = [nixarr-py];
+    libraries = [nixarr-py pkgs.python3Packages.requests];
     flakeIgnore = [
       "E501" # Line too long
     ];
