@@ -51,9 +51,9 @@ def sync_users(config: JellyfinUsersConfig, client: jellyfin.ApiClient) -> int:
             try:
                 password = user_cfg.passwordFile.read_text().strip()
             except Exception as e:
-                logger.error(
-                    f"Failed to read password file for user {user_cfg.name}: {e}"
-                )
+                error_msg = f"Failed to read password file for user {user_cfg.name}: {e}"
+                logger.error(error_msg)
+                errors.append(error_msg)
                 continue
 
         if user_cfg.name not in existing_users:

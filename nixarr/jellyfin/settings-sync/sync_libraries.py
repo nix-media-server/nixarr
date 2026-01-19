@@ -29,7 +29,7 @@ class JellyfinLibrariesConfig(pydantic.BaseModel):
 
 
 def get_library_type_name(lib_type: str) -> str:
-    """Convert our library type to Jellyfin's content type."""
+    """Convert library type to Jellyfin collection type name."""
     type_map = {
         "movies": "movies",
         "tvshows": "tvshows",
@@ -91,7 +91,9 @@ def sync_libraries(config: JellyfinLibrariesConfig, client: jellyfin.ApiClient) 
             logger.info(f"Creating library '{lib_cfg.name}' with type '{lib_cfg.type}'")
             try:
                 # Create the library using direct HTTP request
-                # The jellyfin SDK doesn't expose the virtual folders API properly
+                # The generated Jellyfin SDK has a bug where pydantic validation
+                # converts the CollectionTypeOptions enum to a string before the
+                # serialization method can call .value on it, causing an AttributeError.
                 cfg = get_jellyfin_config()
                 with open(cfg.api_key_file, "r", encoding="utf-8") as f:
                     api_key = f.read().strip()
