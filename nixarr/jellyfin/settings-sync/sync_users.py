@@ -51,7 +51,9 @@ def sync_users(config: JellyfinUsersConfig, client: jellyfin.ApiClient) -> int:
             try:
                 password = user_cfg.passwordFile.read_text().strip()
             except Exception as e:
-                error_msg = f"Failed to read password file for user {user_cfg.name}: {e}"
+                error_msg = (
+                    f"Failed to read password file for user {user_cfg.name}: {e}"
+                )
                 logger.error(error_msg)
                 errors.append(error_msg)
                 continue
@@ -105,7 +107,9 @@ def sync_users(config: JellyfinUsersConfig, client: jellyfin.ApiClient) -> int:
                     )
                     logger.info(f"Updated password for user '{user_cfg.name}'")
                 except Exception as e:
-                    error_msg = f"Failed to update password for user '{user_cfg.name}': {e}"
+                    error_msg = (
+                        f"Failed to update password for user '{user_cfg.name}': {e}"
+                    )
                     logger.error(error_msg)
                     logger.exception(e)
                     errors.append(error_msg)
@@ -126,7 +130,9 @@ def sync_users(config: JellyfinUsersConfig, client: jellyfin.ApiClient) -> int:
                         f"to {user_cfg.isAdministrator}"
                     )
                 except Exception as e:
-                    error_msg = f"Failed to update admin status for user '{user_cfg.name}': {e}"
+                    error_msg = (
+                        f"Failed to update admin status for user '{user_cfg.name}': {e}"
+                    )
                     logger.error(error_msg)
                     logger.exception(e)
                     errors.append(error_msg)

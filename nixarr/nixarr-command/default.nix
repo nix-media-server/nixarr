@@ -91,12 +91,15 @@ with lib; let
       ''}
       ${strings.optionalString (nixarr.jellyfin.enable && nixarr.jellyfin.libraries != []) ''
         # Fix permissions for Jellyfin library paths
-        ${strings.concatMapStringsSep "\n" (lib: strings.concatMapStringsSep "\n" (path: ''
-        if [ -d "${path}" ]; then
-          chown -R ${globals.libraryOwner.user}:${globals.libraryOwner.group} "${path}"
-          find "${path}" \( -type d -exec chmod 0775 {} + -true \) -o \( -exec chmod 0664 {} + \)
-        fi
-      '') lib.paths) nixarr.jellyfin.libraries}
+        ${strings.concatMapStringsSep "\n" (lib:
+          strings.concatMapStringsSep "\n" (path: ''
+            if [ -d "${path}" ]; then
+              chown -R ${globals.libraryOwner.user}:${globals.libraryOwner.group} "${path}"
+              find "${path}" \( -type d -exec chmod 0775 {} + -true \) -o \( -exec chmod 0664 {} + \)
+            fi
+          '')
+          lib.paths)
+        nixarr.jellyfin.libraries}
       ''}
         ${strings.optionalString nixarr.plex.enable ''
         chown -R ${globals.plex.user}:root "${nixarr.plex.stateDir}"
