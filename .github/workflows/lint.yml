@@ -13,23 +13,35 @@ jobs:
   fmt:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v5
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
+        uses: DeterminateSystems/nix-installer-action@v3
 
-      - run: nix fmt -- --check .
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - run: nix fmt -- --no-cache --fail-on-change
+
+  build-website:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v3
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - run: nix build
 
   test:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v5
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
+        uses: DeterminateSystems/nix-installer-action@v3
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
 
       - run: nix flake check

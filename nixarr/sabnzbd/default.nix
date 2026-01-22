@@ -44,8 +44,7 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.sabnzbd.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
       description = "Open firewall for SABnzbd";
     };
@@ -256,7 +255,7 @@ in {
         virtualHosts."127.0.0.1:${builtins.toString cfg.guiPort}" = {
           listen = [
             {
-              addr = "0.0.0.0";
+              addr = nixarr.vpn.proxyListenAddr;
               port = cfg.guiPort;
             }
           ];

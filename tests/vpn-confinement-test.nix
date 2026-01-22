@@ -43,19 +43,27 @@ The test ensures that:
   wgGatewayPort = 51820;
 
   # Generate real WireGuard keys
-  wgGatewayPrivateKey = pkgs.runCommand "wg-gateway-private" {buildInputs = [pkgs.wireguard-tools];} ''
-    wg genkey > $out
-  '';
-  wgGatewayPublicKey = pkgs.runCommand "wg-gateway-public" {buildInputs = [pkgs.wireguard-tools];} ''
-    cat ${wgGatewayPrivateKey} | wg pubkey > $out
-  '';
+  wgGatewayPrivateKey =
+    pkgs.runCommand "wg-gateway-private" {buildInputs = [pkgs.wireguard-tools];}
+    ''
+      wg genkey > $out
+    '';
+  wgGatewayPublicKey =
+    pkgs.runCommand "wg-gateway-public" {buildInputs = [pkgs.wireguard-tools];}
+    ''
+      cat ${wgGatewayPrivateKey} | wg pubkey > $out
+    '';
 
-  wgClientPrivateKey = pkgs.runCommand "wg-client-private" {buildInputs = [pkgs.wireguard-tools];} ''
-    wg genkey > $out
-  '';
-  wgClientPublicKey = pkgs.runCommand "wg-client-public" {buildInputs = [pkgs.wireguard-tools];} ''
-    cat ${wgClientPrivateKey} | wg pubkey > $out
-  '';
+  wgClientPrivateKey =
+    pkgs.runCommand "wg-client-private" {buildInputs = [pkgs.wireguard-tools];}
+    ''
+      wg genkey > $out
+    '';
+  wgClientPublicKey =
+    pkgs.runCommand "wg-client-public" {buildInputs = [pkgs.wireguard-tools];}
+    ''
+      cat ${wgClientPrivateKey} | wg pubkey > $out
+    '';
 
   # Network configuration
   wgGatewayAddr = "10.100.0.1";
@@ -92,7 +100,7 @@ The test ensures that:
     PersistentKeepalive = 25
   '';
 in
-  pkgs.nixosTest {
+  pkgs.testers.nixosTest {
     name = "nixarr-vpn-confinement-test";
 
     # Disable interactive mode to avoid hanging
@@ -128,7 +136,10 @@ in
             "${internetClientIP}/24"
             "${internetClientIPv6}/64"
           ];
-          gateway = ["${internetGatewayIP}" "${internetGatewayIPv6}"];
+          gateway = [
+            "${internetGatewayIP}"
+            "${internetGatewayIPv6}"
+          ];
           routes = [
             {
               Destination = "${wgSubnet}";
@@ -189,7 +200,10 @@ in
         pkgs,
         ...
       }: {
-        virtualisation.vlans = [1 2]; # VLAN 1 for LAN, VLAN 2 for Internet
+        virtualisation.vlans = [
+          1
+          2
+        ]; # VLAN 1 for LAN, VLAN 2 for Internet
 
         networking = {
           interfaces.eth1 = {
@@ -224,19 +238,28 @@ in
 
           firewall = {
             enable = true;
-            allowedUDPPorts = [wgGatewayPort 51413];
+            allowedUDPPorts = [
+              wgGatewayPort
+              51413
+            ];
             allowedTCPPorts = [51413];
           };
 
           wireguard.interfaces.wg0 = {
-            ips = ["${wgGatewayAddr}/24" "${wgGatewayAddrV6}/64"];
+            ips = [
+              "${wgGatewayAddr}/24"
+              "${wgGatewayAddrV6}/64"
+            ];
             listenPort = wgGatewayPort;
             privateKeyFile = "${wgGatewayPrivateKey}";
 
             peers = [
               {
                 publicKey = builtins.readFile wgClientPublicKey;
-                allowedIPs = ["${wgClientAddr}/32" "${wgClientAddrV6}/128"];
+                allowedIPs = [
+                  "${wgClientAddr}/32"
+                  "${wgClientAddrV6}/128"
+                ];
               }
             ];
           };

@@ -9,9 +9,37 @@ with lib; let
   globals = config.util-nixarr.globals;
   nixarr = config.nixarr;
 
-  # Define config format and template
+  # Define config format
   configFormat = pkgs.formats.toml {};
-  configTemplate = configFormat.generate "autobrr.toml" cfg.settings;
+
+  # Helper function to determine if metrics should be enabled
+  metricsEnabled = nixarr.exporters.enable && (cfg.exporter.enable == null || cfg.exporter.enable);
+
+  # Build the final settings without using mkMerge/mkIf directly
+  finalSettings =
+    # Start with user settings
+    cfg.settings
+    //
+    # Ensure host is 0.0.0.0 by default, and force it when VPN is enabled
+    (
+      if (!(cfg.settings ? host) || cfg.vpn.enable)
+      then {host = "0.0.0.0";}
+      else {}
+    )
+    //
+    # Add metrics if enabled - use top-level keys as per autobrr docs
+    (
+      if metricsEnabled
+      then {
+        metricsEnabled = true;
+        metricsHost = "0.0.0.0";
+        metricsPort = cfg.exporter.port;
+      }
+      else {}
+    );
+
+  # Generate the template from the evaluated settings
+  configTemplate = configFormat.generate "autobrr.toml" finalSettings;
 in {
   options.nixarr.autobrr = {
     enable = mkOption {
@@ -29,8 +57,7 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.autobrr.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
       description = "Open firewall for the Autobrr port.";
     };
@@ -74,6 +101,25 @@ in {
       example = "/nixarr/.state/autobrr";
       description = "The location of the state directory for the Autobrr service.";
     };
+
+    exporter = {
+      enable = mkOption {
+        type = types.nullOr types.bool;
+        default = null;
+        example = true;
+        description = ''
+          Whether to enable the Prometheus metrics exporter for Autobrr.
+          If null, follows the global nixarr.exporters.enable setting.
+        '';
+      };
+
+      port = mkOption {
+        type = types.port;
+        default = 9712;
+        example = 9712;
+        description = "Port for the Prometheus metrics exporter.";
+      };
+    };
   };
 
   config = mkIf cfg.enable {
@@ -115,12 +161,7 @@ in {
       # We need to provide a secretFile even though we're handling it ourselves
       # The actual secret file is generated in the systemd service at ${cfg.stateDir}/session-secret
       secretFile = "/dev/null"; # This is a placeholder that won't be used
-      settings = mkMerge [
-        # User settings
-        cfg.settings
-        # Override host if VPN is enabled
-        (mkIf cfg.vpn.enable {host = "192.168.15.1";})
-      ];
+      settings = finalSettings;
     };
 
     # Override the autobrr service to use our state directory and session secret handling
@@ -173,6 +214,11 @@ in {
           from = cfg.settings.port;
           to = cfg.settings.port;
         }
+        # Add mapping for metrics port if enabled
+        (mkIf metricsEnabled {
+          from = cfg.exporter.port;
+          to = cfg.exporter.port;
+        })
       ];
     };
 
@@ -183,24 +229,41 @@ in {
       recommendedOptimisation = true;
       recommendedGzipSettings = true;
 
-      virtualHosts."127.0.0.1:${builtins.toString cfg.settings.port}" = {
-        listen = [
-          {
-            addr = "0.0.0.0";
-            port = cfg.settings.port;
-          }
-        ];
-        locations."/" = {
-          recommendedProxySettings = true;
-          proxyWebsockets = true;
-          proxyPass = "http://192.168.15.1:${builtins.toString cfg.settings.port}";
+      virtualHosts = {
+        # Main service proxy
+        "127.0.0.1:${builtins.toString cfg.settings.port}" = {
+          listen = [
+            {
+              addr = nixarr.vpn.proxyListenAddr;
+              port = cfg.settings.port;
+            }
+          ];
+          locations."/" = {
+            recommendedProxySettings = true;
+            proxyWebsockets = true;
+            proxyPass = "http://192.168.15.1:${builtins.toString cfg.settings.port}";
+          };
+        };
+
+        # Metrics endpoint proxy (only if metrics are enabled)
+        "127.0.0.1:${builtins.toString cfg.exporter.port}" = mkIf metricsEnabled {
+          listen = [
+            {
+              addr = nixarr.vpn.proxyListenAddr;
+              port = cfg.exporter.port;
+            }
+          ];
+          locations."/" = {
+            recommendedProxySettings = true;
+            proxyPass = "http://192.168.15.1:${builtins.toString cfg.exporter.port}";
+          };
         };
       };
     };
 
     # Open firewall ports if needed
     networking.firewall = mkIf cfg.openFirewall {
-      allowedTCPPorts = [cfg.settings.port];
+      allowedTCPPorts = [cfg.settings.port cfg.exporter.port];
     };
   };
 }

@@ -110,10 +110,9 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.transmission.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
-      description = "Open firewall for `peer-port` and `rpc-port`.";
+      description = "Open firewall for `rpc-port`.";
     };
 
     extraAllowedIps = mkOption {
@@ -234,10 +233,13 @@ in {
     };
 
     peerPort = mkOption {
-      type = types.port;
-      default = 50000;
-      example = 12345;
-      description = "Transmission peer traffic port.";
+      type = with types; nullOr port;
+      default = null;
+      example = 50000;
+      description = ''
+        Transmission peer traffic port. Also opens the firewall for listed
+        port if not set to null (default).
+      '';
     };
 
     uiPort = mkOption {
@@ -372,9 +374,8 @@ in {
         then pkgs.flood-for-transmission
         else null;
       package = cfg.package;
-      openFirewall = cfg.openFirewall;
       openRPCPort = cfg.openFirewall;
-      openPeerPorts = cfg.openFirewall;
+      openPeerPorts = cfg.peerPort != null;
       credentialsFile = cfg.credentialsFile;
       settings =
         {
@@ -401,7 +402,11 @@ in {
           blocklist-enabled = true;
           blocklist-url = "https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz";
 
-          peer-port = cfg.peerPort;
+          # 51413 is the default port, but if it's not explicitly set, we block the port
+          peer-port =
+            if cfg.peerPort != null
+            then cfg.peerPort
+            else 51413;
           dht-enabled = !cfg.privateTrackers.disableDhtPex;
           pex-enabled = !cfg.privateTrackers.disableDhtPex;
           utp-enabled = false;
@@ -469,7 +474,7 @@ in {
       virtualHosts."127.0.0.1:${builtins.toString cfg.uiPort}" = {
         listen = [
           {
-            addr = "0.0.0.0";
+            addr = nixarr.vpn.proxyListenAddr;
             port = cfg.uiPort;
           }
         ];

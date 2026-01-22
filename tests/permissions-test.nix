@@ -4,7 +4,7 @@
   nixosModules,
   lib ? pkgs.lib,
 }:
-pkgs.nixosTest {
+pkgs.testers.nixosTest {
   name = "nixarr-permissions-test";
 
   nodes.machine = {

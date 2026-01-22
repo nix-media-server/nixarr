@@ -119,3 +119,35 @@ with JSON, and can therefore be configured with nix. The most basic settings are
   - You can now log in.
 - Go to "Settings" > "Apps" and add your _Arrs_.
   - Get the API key by typing `sudo nixarr list-api-keys` in your terminal.
+
+### Declarative Configuration
+
+Instead of manually configuring Prowlarr, you can use the `nixarr.prowlarr.settings-sync` options to declaratively manage your configuration.
+
+**Sync Applications**:
+Automatically sync your enabled Arr applications (Sonarr, Radarr, Lidarr, Readar, Readarr-Audiobook) to Prowlarr:
+
+```nix
+nixarr.prowlarr.settings-sync.enable-nixarr-apps = true;
+```
+
+**Configure Indexers**:
+Define your indexers directly in Nix:
+
+```nix
+nixarr.prowlarr.settings-sync.indexers = [
+  {
+    sort_name = "nzbgeek";
+    fields = {
+      apiKey.secret = "/path/to/api/key";
+    };
+  }
+];
+```
+
+**Manage Tags**:
+Define tags to be created in Prowlarr:
+
+```nix
+nixarr.prowlarr.settings-sync.tags = [ "iso" "remux" ];
+```

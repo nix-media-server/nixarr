@@ -10,6 +10,8 @@ with lib; let
   port = 6767;
   nixarr = config.nixarr;
 in {
+  imports = [./settings-sync];
+
   options.nixarr.bazarr = {
     enable = mkOption {
       type = types.bool;
@@ -49,8 +51,7 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.bazarr.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
       description = "Open firewall for Bazarr";
     };
@@ -143,7 +144,7 @@ in {
       virtualHosts."127.0.0.1:${builtins.toString cfg.port}" = {
         listen = [
           {
-            addr = "0.0.0.0";
+            addr = nixarr.vpn.proxyListenAddr;
             port = cfg.port;
           }
         ];

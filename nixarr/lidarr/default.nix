@@ -49,8 +49,7 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.lidarr.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
       description = "Open firewall for Lidarr";
     };
@@ -129,7 +128,7 @@ in {
       virtualHosts."127.0.0.1:${builtins.toString cfg.port}" = {
         listen = [
           {
-            addr = "0.0.0.0";
+            addr = nixarr.vpn.proxyListenAddr;
             port = cfg.port;
           }
         ];

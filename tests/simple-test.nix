@@ -3,7 +3,7 @@
   nixosModules,
   lib ? pkgs.lib,
 }:
-pkgs.nixosTest {
+pkgs.testers.nixosTest {
   name = "simple-test";
 
   nodes.machine = {
@@ -27,6 +27,10 @@ pkgs.nixosTest {
         enable = true;
         privateTrackers.cross-seed.enable = true;
       };
+
+      # Note: qbittorrent and transmission are mutually exclusive
+      # (they share the same download directories)
+      # qbittorrent.enable = true;
 
       autobrr.enable = true;
       bazarr.enable = true;
