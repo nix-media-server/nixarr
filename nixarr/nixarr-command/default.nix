@@ -103,7 +103,7 @@ with lib; let
         find "${nixarr.transmission.stateDir}" \( -type d -exec chmod 0750 {} + -true \) -o \( -exec chmod 0640 {} + \)
       ''}
         ${strings.optionalString nixarr.qbittorrent.enable ''
-        chown -R ${globals.qbittorrent.user}:${globals.qbittorrent.group} "${nixarr.mediaDir}/torrents"
+        chown -R ${globals.qbittorrent.user}:${globals.qbittorrent.group} "${nixarr.mediaDir}/qbittorrent"
         chown -R ${globals.qbittorrent.user}:root "${nixarr.qbittorrent.stateDir}"
         find "${nixarr.qbittorrent.stateDir}" \( -type d -exec chmod 0750 {} + -true \) -o \( -exec chmod 0640 {} + \)
       ''}
