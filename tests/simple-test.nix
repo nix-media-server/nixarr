@@ -13,6 +13,7 @@ pkgs.testers.nixosTest {
   }: {
     imports = [nixosModules.default];
 
+    virtualisation.memorySize = 6144; # 6GB for many services
     networking.firewall.enable = false;
 
     nixarr = {

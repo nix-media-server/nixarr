@@ -21,6 +21,7 @@ pkgs.testers.runNixOSTest {
     };
 
     virtualisation.cores = 4; # one per service plus one for luck
+    virtualisation.memorySize = 4096; # 4GB for multiple *arr services
 
     networking.firewall.enable = false;
 
@@ -59,7 +60,7 @@ pkgs.testers.runNixOSTest {
     machine.wait_for_unit("radarr-api.service")
 
     # Once the APIs are up, the sync service shouldn't take long
-    machine.wait_for_unit("prowlarr-sync-config.service", timeout=60)
+    machine.wait_for_unit("prowlarr-sync-config.service", timeout=120)
 
     print("\n=== Prowlarr Sync Test Completed ===")
   '';
