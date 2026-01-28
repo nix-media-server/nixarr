@@ -1,4 +1,4 @@
-{
+inputs: {
   config,
   lib,
   pkgs,
@@ -33,6 +33,7 @@ in {
     ./whisparr
     ./monitoring
     ../util
+    ((import ./unmanic) inputs)
   ];
 
   options.nixarr = {
