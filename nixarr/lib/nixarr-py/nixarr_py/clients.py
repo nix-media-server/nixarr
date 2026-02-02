@@ -18,7 +18,10 @@ import sonarr
 import whisparr
 
 from nixarr_py.config import get_simple_service_config as _get_simple_service_config
-from nixarr_py.jellyfin_helpers import api_key_client as _jellyfin_api_key_client
+from nixarr_py.jellyfin_helpers import (
+    api_key_client as _jellyfin_api_key_client,
+    unauthenticated_client as _jellyfin_unauthenticated_client,
+)
 
 
 def jellyfin_client() -> jellyfin.ApiClient:
@@ -35,6 +38,25 @@ def jellyfin_client() -> jellyfin.ApiClient:
         ...     system_info = system_client.get_system_info()
     """
     return _jellyfin_api_key_client()
+
+
+def jellyfin_client_unauthorized() -> jellyfin.ApiClient:
+    """Create an unauthenticated Jellyfin API client configured for use with Nixarr.
+
+    Returns:
+        jellyfin.ApiClient: API client instance configured to connect to
+        the local Nixarr Jellyfin service without authentication.
+    Example:
+        >>> import jellyfin
+        >>> from nixarr_py.clients import jellyfin_client_unauthorized
+        >>> with jellyfin_client_unauthorized() as client:
+        ...     auth_header = 'MediaBrowser Client="app", Device="device", DeviceId="id", Version="1"'
+        ...     auth_result = jellyfin.UserApi(client).authenticate_user_by_name(
+        ...         jellyfin.AuthenticateUserByName(username="user", pw="password"),
+        ...         _headers={"Authorization": auth_header}
+        ...     )
+    """
+    return _jellyfin_unauthenticated_client()
 
 
 def _make_arr_client(service: str, module):

@@ -10,6 +10,7 @@ with lib; let
   defaultPort = 8096;
   nixarr = config.nixarr;
 in {
+  imports = [./settings-sync];
   options.nixarr.jellyfin = {
     enable = mkOption {
       type = types.bool;
@@ -108,6 +109,102 @@ in {
           description = "The ACME mail required for the letsencrypt bot.";
         };
       };
+    };
+
+    users = mkOption {
+      type = types.listOf (types.submodule {
+        options = {
+          name = mkOption {
+            type = types.str;
+            description = "The username for the Jellyfin user.";
+          };
+          passwordFile = mkOption {
+            type = types.nullOr types.path;
+            default = null;
+            description = "Path to a file containing the password for the Jellyfin user.";
+          };
+          isAdministrator = mkOption {
+            type = types.bool;
+            default = false;
+            description = "Whether this user should have administrator privileges.";
+          };
+        };
+      });
+      default = [];
+      example = [
+        {
+          name = "admin";
+          passwordFile = "/run/secrets/jellyfin-admin-password";
+          isAdministrator = true;
+        }
+        {
+          name = "viewer";
+          passwordFile = "/run/secrets/jellyfin-viewer-password";
+        }
+      ];
+      description = ''
+        List of Jellyfin users to create and manage declaratively.
+
+        Users defined here will be created if they don't exist, and their
+        passwords will be updated if a passwordFile is provided.
+
+        Note: This requires the jellyfin-api service to be running, which
+        handles initial setup and authentication.
+      '';
+    };
+
+    libraries = mkOption {
+      type = types.listOf (types.submodule {
+        options = {
+          name = mkOption {
+            type = types.str;
+            description = "The name of the library.";
+            example = "Movies";
+          };
+          type = mkOption {
+            type = types.enum ["movies" "tvshows" "music" "books" "mixed"];
+            description = "The type of content in this library.";
+            example = "movies";
+          };
+          paths = mkOption {
+            type = types.listOf types.path;
+            description = "List of paths to include in this library.";
+            example = ["/media/movies"];
+          };
+          enable = mkOption {
+            type = types.bool;
+            default = true;
+            description = "Whether this library should be enabled.";
+          };
+        };
+      });
+      default = [];
+      example = [
+        {
+          name = "Movies";
+          type = "movies";
+          paths = ["/media/library/movies"];
+        }
+        {
+          name = "TV Shows";
+          type = "tvshows";
+          paths = ["/media/library/shows"];
+        }
+        {
+          name = "Music";
+          type = "music";
+          paths = ["/media/library/music"];
+        }
+      ];
+      description = ''
+        List of Jellyfin libraries to create and manage declaratively.
+
+        Libraries defined here will be created if they don't exist, and their
+        paths will be updated if they change.
+
+        Note: This requires the jellyfin-api service to be running, which
+        handles initial setup and authentication.
+      '';
     };
   };
 
@@ -208,12 +305,12 @@ in {
           locations."/" = {
             recommendedProxySettings = true;
             proxyWebsockets = true;
-            proxyPass = "http://127.0.0.1:${builtins.toString defaultPort}";
+            proxyPass = "http://127.0.0.1:${builtins.toString cfg.port}";
           };
         };
       })
       (mkIf cfg.vpn.enable {
-        virtualHosts."127.0.0.1:${builtins.toString defaultPort}" = mkIf cfg.vpn.enable {
+        virtualHosts."127.0.0.1:${builtins.toString cfg.port}" = mkIf cfg.vpn.enable {
           listen = [
             {
               addr = nixarr.vpn.proxyListenAddr;
@@ -223,7 +320,7 @@ in {
           locations."/" = {
             recommendedProxySettings = true;
             proxyWebsockets = true;
-            proxyPass = "http://192.168.15.1:${builtins.toString defaultPort}";
+            proxyPass = "http://192.168.15.1:${builtins.toString cfg.port}";
           };
         };
       })
@@ -244,8 +341,8 @@ in {
     vpnNamespaces.wg = mkIf cfg.vpn.enable {
       portMappings = [
         {
-          from = defaultPort;
-          to = defaultPort;
+          from = cfg.port;
+          to = cfg.port;
         }
       ];
     };

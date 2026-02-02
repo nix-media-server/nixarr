@@ -71,6 +71,12 @@
       jellyfin-api-test = pkgs.callPackage ./tests/jellyfin-api-test.nix {
         inherit (self) nixosModules;
       };
+      jellyfin-users-test = pkgs.callPackage ./tests/jellyfin-users-test.nix {
+        inherit (self) nixosModules;
+      };
+      jellyfin-libraries-test = pkgs.callPackage ./tests/jellyfin-libraries-test.nix {
+        inherit (self) nixosModules;
+      };
     });
 
     devShells = forAllSystems ({pkgs}: let

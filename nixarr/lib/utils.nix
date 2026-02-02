@@ -23,9 +23,11 @@
     ;
 
   mkArrLocalUrl = service: let
-    port = config.nixarr.${service}.port;
-    urlBase = config.services.${service}.settings.server.urlBase or "";
-  in "http://127.0.0.1:${toString port}${urlBase}";
+    server =
+      if (config ? services && config.services ? ${service} && config.services.${service} ? settings && config.services.${service}.settings ? server)
+      then config.services.${service}.settings.server
+      else {port = 0;};
+  in "http://127.0.0.1:${toString server.port}${server.urlBase or ""}";
 
   # Turns `readarr` into `Readarr` and `readarr-audiobook` into
   # `Readarr-Audiobook`.
