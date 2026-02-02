@@ -3,20 +3,60 @@
 ## Unreleased
 
 Added:
-- qBittorrent service with VPN support, qui WebUI, and Prometheus exporter
-- Prowlarr, Radarr, Sonarr:
-  - Options for syncing configuration from Nixarr to apps (e.g. specifying
-    indexers in Nixarr and having them automatically added to Prowlarr).
-    See individual app config docs for what is supported.
-- `nixarr` command:
+- **Declarative settings-sync** for multiple services, allowing configuration
+  via Nix options instead of manual UI setup:
+  - **Prowlarr:** Declaratively manage indexers, applications (Sonarr, Radarr,
+    Lidarr, Readarr, Readarr-Audiobook, Whisparr), and tags. Use
+    `nixarr.prowlarr.settings-sync` to configure. Set `enable-nixarr-apps = true`
+    to automatically sync all enabled *Arrs.
+  - **Sonarr:** Declaratively configure download clients. Use
+    `nixarr.sonarr.settings-sync.transmission.enable = true` to automatically
+    add Transmission, or specify custom clients via `downloadClients`.
+  - **Radarr:** Same as Sonarr — declaratively configure download clients via
+    `nixarr.radarr.settings-sync`.
+  - **Bazarr:** Declaratively configure Sonarr/Radarr connections. Use
+    `nixarr.bazarr.settings-sync.sonarr.enable = true` and
+    `nixarr.bazarr.settings-sync.radarr.enable = true` with optional filtering
+    for monitored content only.
+- **qBittorrent service** with VPN confinement support, [qui](https://github.com/autobrr/qui)
+  WebUI (enabled by default), private tracker mode, Prometheus exporter, and
+  `extraConfig` for declarative configuration.
+- **Prometheus monitoring** for *Arr services:
+  - Exportarr-based exporters for Sonarr, Radarr, Lidarr, Readarr, and Prowlarr.
+  - qBittorrent Prometheus exporter.
+  - Node, systemd, and WireGuard exporters.
+  - VPN-aware: exporters are automatically confined to the VPN namespace when
+    the monitored service is VPN-confined.
+  - Enable with `nixarr.exporters.enable = true`.
+- **Jellyfin Python API client** (`nixarr-py`): a standalone Python library for
+  interacting with Nixarr services via [devopsarr](https://github.com/devopsarr)
+  clients. Includes Jellyfin API authentication via API key or username/password.
+- `nixarr` command additions:
   - `nixarr show-prowlarr-schemas`, `nixarr show-radarr-schemas`,
-    `nixarr show-sonarr-schemas`
-    - Show what schemas are supported/expected by those apps for syncing. See
-      individual app config docs for how to use these schemas when writing your
-      Nixarr config.
-- Python library `lib/nixarr-py`: helpers for making
-  [devopsarr](https://github.com/devopsarr) clients configured to connect to
-  Nixarr services.
+    `nixarr show-sonarr-schemas` — show what schemas are supported/expected by
+    those apps for settings-sync configuration.
+- **Nginx localhost option:** `proxyListenAddr` and `exposeOnLAN` options to
+  restrict nginx to listen on `127.0.0.1` only, allowing reverse proxies like
+  Caddy or Tailscale to front services.
+- **Audiobookshelf:** exposed `host` option for configuring listen address,
+  fixed `openFirewall` to actually open ports.
+
+Changed:
+- Formatting now uses `treefmt-nix` with `alejandra` (Nix) and `ruff-format`
+  (Python).
+- CI modernized: pinned action versions, magic Nix cache for faster builds,
+  automatic flake update PRs.
+- `show-schemas` commands moved from individual services to the `nixarr` command.
+- Python package renamed from `nixarr` to `nixarr_py` to avoid import conflicts.
+- `nixarr-py` split into standalone library plus system config module.
+
+Fixed:
+- *Arr services (Radarr, Sonarr, Lidarr, Bazarr) now set `UMask = "0002"` in
+  systemd, ensuring directories are created with 775 permissions for proper
+  group access.
+- qBittorrent `fix-permissions` now uses the correct download path.
+- Jellyfin authentication cleaned up: uses shared API key instead of creating
+  a new device UUID per connection.
 
 ## 2025-11-15
 
