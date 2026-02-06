@@ -80,6 +80,7 @@ in {
 
         Configure nginx as a reverse proxy for the Readarr Audiobook web ui.
       '';
+      defaultText = literalExpression "nixarr.readarr-audiobook.vpn.enable";
     };
   };
 

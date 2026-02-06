@@ -73,6 +73,7 @@ in {
 
         Configure nginx as a reverse proxy for the Plex web ui.
       '';
+      defaultText = literalExpression "nixarr.plex.vpn.enable";
     };
 
     expose = {

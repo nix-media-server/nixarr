@@ -75,6 +75,7 @@ in {
 
         Configure nginx as a reverse proxy for the Whisparr web ui.
       '';
+      defaultText = literalExpression "nixarr.whisparr.vpn.enable";
     };
   };
 

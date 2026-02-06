@@ -106,6 +106,7 @@ in {
 
         Configure nginx as a reverse proxy for the Sabnzbd web ui.
       '';
+      defaultText = literalExpression "nixarr.sabnzbd.vpn.enable";
     };
   };
 

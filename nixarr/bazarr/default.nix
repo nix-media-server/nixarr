@@ -75,6 +75,7 @@ in {
 
         Configure nginx as a reverse proxy for the Bazarr web ui.
       '';
+      defaultText = literalExpression "nixarr.bazarr.vpn.enable";
     };
   };
 

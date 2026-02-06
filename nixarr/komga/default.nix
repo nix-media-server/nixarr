@@ -70,6 +70,7 @@ in {
 
         Configure nginx as a reverse proxy for the Komga web ui.
       '';
+      defaultText = literalExpression "nixarr.komga.vpn.enable";
     };
 
     expose = {

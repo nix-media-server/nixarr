@@ -75,6 +75,7 @@ in {
 
         Configure nginx as a reverse proxy for the Lidarr web ui.
       '';
+      defaultText = literalExpression "nixarr.lidarr.vpn.enable";
     };
   };
 

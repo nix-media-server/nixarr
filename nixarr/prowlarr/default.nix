@@ -77,6 +77,7 @@ in {
 
         Configure nginx as a reverse proxy for the Prowlarrweb ui.
       '';
+      defaultText = literalExpression "nixarr.prowlarr.vpn.enable";
     };
   };
 

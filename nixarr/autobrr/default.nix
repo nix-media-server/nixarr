@@ -55,6 +55,7 @@ in {
 
         Configure nginx as a reverse proxy for the Autobrr web ui.
       '';
+      defaultText = literalExpression "nixarr.autobrr.vpn.enable";
     };
 
     settings = lib.mkOption {

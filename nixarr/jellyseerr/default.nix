@@ -78,6 +78,7 @@ in {
 
         Configure nginx as a reverse proxy for the Jellyseerr web ui.
       '';
+      defaultText = literalExpression "nixarr.jellyseerr.vpn.enable";
     };
 
     expose = {

@@ -75,6 +75,7 @@ in {
 
         Configure nginx as a reverse proxy for the Sonarr web ui.
       '';
+      defaultText = literalExpression "nixarr.sonarr.vpn.enable";
     };
   };
 

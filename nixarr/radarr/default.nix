@@ -75,6 +75,7 @@ in {
 
         Configure nginx as a reverse proxy for the Radarr web ui.
       '';
+      defaultText = literalExpression "nixarr.radarr.vpn.enable";
     };
   };
 

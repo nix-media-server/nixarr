@@ -147,6 +147,7 @@ in {
 
         Configure nginx as a reverse proxy for the transmission web ui.
       '';
+      defaultText = literalExpression "nixarr.transmission.vpn.enable";
     };
 
     flood.enable = mkEnableOption "the flood web-UI for the transmission web-UI.";

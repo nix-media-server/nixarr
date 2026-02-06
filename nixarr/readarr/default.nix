@@ -75,6 +75,7 @@ in {
 
         Configure nginx as a reverse proxy for the Readarr web ui.
       '';
+      defaultText = literalExpression "nixarr.readarr.vpn.enable";
     };
   };
 

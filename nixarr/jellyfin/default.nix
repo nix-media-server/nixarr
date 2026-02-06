@@ -73,6 +73,7 @@ in {
 
         Configure nginx as a reverse proxy for the Jellyfin web ui.
       '';
+      defaultText = literalExpression "nixarr.jellyfin.vpn.enable";
     };
 
     expose = {

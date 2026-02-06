@@ -83,6 +83,7 @@ in {
 
         Configure nginx as a reverse proxy for the Audiobookshelf web ui.
       '';
+      defaultText = literalExpression "nixarr.audiobookshelf.vpn.enable";
     };
 
     expose = {
