@@ -61,6 +61,18 @@ in {
       '';
     };
 
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.plex.vpn.enable`)(#nixarr.lidarr.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Plex web ui.
+      '';
+      defaultText = literalExpression "nixarr.plex.vpn.enable";
+    };
+
     expose = {
       https = {
         enable = mkOption {
@@ -116,6 +128,13 @@ in {
         message = ''
           The nixarr.plex.vpn.enable option conflicts with the
           nixarr.plex.expose.https.enable option. You cannot set both.
+        '';
+      }
+      {
+        assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+        message = ''
+          The nixarr.komga.vpn.configureNginx option requires the
+          nixarr.komga.vpn.enable option to be set, but it was not.
         '';
       }
       {
@@ -175,7 +194,7 @@ in {
     };
 
     services.nginx = mkMerge [
-      (mkIf (cfg.expose.https.enable || cfg.vpn.enable) {
+      (mkIf (cfg.expose.https.enable || cfg.vpn.configureNginx) {
         enable = true;
 
         recommendedTlsSettings = true;
@@ -193,7 +212,7 @@ in {
           };
         };
       })
-      (mkIf cfg.vpn.enable {
+      (mkIf cfg.vpn.configureNginx {
         virtualHosts."127.0.0.1:${builtins.toString defaultPort}" = mkIf cfg.vpn.enable {
           listen = [
             {

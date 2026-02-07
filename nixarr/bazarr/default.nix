@@ -66,6 +66,18 @@ in {
         Route Bazarr traffic through the VPN.
       '';
     };
+
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.bazarr.vpn.enable`)(#nixarr.bazarr.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Bazarr web ui.
+      '';
+      defaultText = literalExpression "nixarr.bazarr.vpn.enable";
+    };
   };
 
   config = mkIf (nixarr.enable && cfg.enable) {
@@ -75,6 +87,13 @@ in {
         message = ''
           The nixarr.bazarr.vpn.enable option requires the
           nixarr.vpn.enable option to be set, but it was not.
+        '';
+      }
+      {
+        assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+        message = ''
+          The nixarr.bazarr.vpn.configureNginx option requires the
+          nixarr.bazarr.vpn.enable option to be set, but it was not.
         '';
       }
     ];
@@ -137,7 +156,7 @@ in {
       ];
     };
 
-    services.nginx = mkIf cfg.vpn.enable {
+    services.nginx = mkIf cfg.vpn.configureNginx {
       enable = true;
 
       recommendedTlsSettings = true;
