@@ -31,10 +31,11 @@ option, which by default is set to `/data/media`.
 
 ## Transmission
 
-Transmission should already be setup and running since it's configured
-with JSON, and can therefore be configured with nix. The most basic settings are already set. See the following links for more info:
+Transmission should already be setup and running since it's configured with
+JSON, and can therefore be configured with nix. The most basic settings are
+already set. See the following links for more info:
 
-- [The configured Nixarr defaults for transmission](https://github.com/rasmus-kirk/nixarr/blob/28d1be070deb1a064c1967889c11c8921752fa09/nixarr/transmission/default.nix#L355)
+- [The configured Nixarr defaults for transmission](https://github.com/nix-media-server/nixarr/blob/28d1be070deb1a064c1967889c11c8921752fa09/nixarr/transmission/default.nix#L355)
 - [The `nixarr.transmission` options](https://nixarr.com/nixos-options/#nixarr.transmission.enable)
 - [Settings that can be passed through `nixarr.transmission.settings`]
 

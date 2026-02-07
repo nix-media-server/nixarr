@@ -10,7 +10,7 @@ with lib; let
   nixarr = config.nixarr;
   # This is a carbon copy of the yaml implementation in nixpkgs https://github.com/NixOS/nixpkgs/blob/fde6c4aec177afa2d0248b1c5983e2a72a231442/pkgs/pkgs-lib/formats.nix#L210-L231
   # except we've replaced json2yaml for yq-go to allow it to parse custom yaml tags
-  # ideally this would some day be upstreamed, see https://github.com/NixOS/nix/issues/4910 and https://github.com/rasmus-kirk/nixarr/issues/91
+  # ideally this would some day be upstreamed, see https://github.com/NixOS/nix/issues/4910 and https://github.com/nix-media-server/nixarr/issues/91
   yamlGenerator = {preserved-tags ? []}: let
     selectors =
       pkgs.lib.strings.concatStringsSep "|"

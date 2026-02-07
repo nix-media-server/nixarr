@@ -31,6 +31,8 @@ Added:
 - **Jellyfin Python API client** (`nixarr-py`): a standalone Python library for
   interacting with Nixarr services via [devopsarr](https://github.com/devopsarr)
   clients. Includes Jellyfin API authentication via API key or username/password.
+- **`configureNginx` option** for services, to support users who would rather
+  not use Nginx.
 - `nixarr` command additions:
   - `nixarr show-prowlarr-schemas`, `nixarr show-radarr-schemas`,
     `nixarr show-sonarr-schemas` — show what schemas are supported/expected by
