@@ -301,10 +301,13 @@ in {
               echo "/etc/resolv.conf contains:"
               cat /etc/resolv.conf
 
-              # Query resolvconf
-              echo "resolvconf output:"
-              resolvconf -l
-              echo ""
+              # Check if resolvconf is available
+              if command -v resolvconf >/dev/null 2>&1; then
+                # Query resolvconf
+                echo "resolvconf output:"
+                resolvconf -l
+                echo ""
+              fi
 
               # Get ip
               echo "Getting IP:"
