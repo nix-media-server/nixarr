@@ -4,6 +4,8 @@
 
 Added:
 - qBittorrent service with VPN support, qui WebUI, and Prometheus exporter
+- Added a `configureNginx` option to support users who would rather not
+  use Nginx.
 - Prowlarr, Radarr, Sonarr:
   - Options for syncing configuration from Nixarr to apps (e.g. specifying
     indexers in Nixarr and having them automatically added to Prowlarr).

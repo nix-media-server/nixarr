@@ -66,7 +66,7 @@ like shown in this example flake:
 
     inputs = {
       nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-      nixarr.url = "github:rasmus-kirk/nixarr";
+      nixarr.url = "github:nix-media-server/nixarr";
     };
 
     outputs = { 

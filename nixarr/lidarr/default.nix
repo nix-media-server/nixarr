@@ -64,6 +64,18 @@ in {
         Route Lidarr traffic through the VPN.
       '';
     };
+
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.lidarr.vpn.enable`)(#nixarr.lidarr.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Lidarr web ui.
+      '';
+      defaultText = literalExpression "nixarr.lidarr.vpn.enable";
+    };
   };
 
   config = mkIf (nixarr.enable && cfg.enable) {
@@ -73,6 +85,13 @@ in {
         message = ''
           The nixarr.lidarr.vpn.enable option requires the
           nixarr.vpn.enable option to be set, but it was not.
+        '';
+      }
+      {
+        assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+        message = ''
+          The nixarr.lidarr.vpn.configureNginx option requires the
+          nixarr.lidarr.vpn.enable option to be set, but it was not.
         '';
       }
     ];
@@ -101,6 +120,10 @@ in {
       dataDir = cfg.stateDir;
     };
 
+    # Set UMask to 0002 so directories are created with group write permission (775)
+    # This allows other services in the media group (like Jellyfin) to modify files
+    systemd.services.lidarr.serviceConfig.UMask = "0002";
+
     # Enable and specify VPN namespace to confine service in.
     systemd.services.lidarr.vpnConfinement = mkIf cfg.vpn.enable {
       enable = true;
@@ -118,7 +141,7 @@ in {
       ];
     };
 
-    services.nginx = mkIf cfg.vpn.enable {
+    services.nginx = mkIf cfg.vpn.configureNginx {
       enable = true;
 
       recommendedTlsSettings = true;
