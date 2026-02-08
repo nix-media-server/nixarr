@@ -94,12 +94,12 @@ host network and proxies requests to qBittorrent inside the VPN namespace.
 
 **Default ports:**
 
-| Service | Port | Description |
-|---------|------|-------------|
-| qui WebUI | 5252 | The web interface you access in your browser |
+| Service              | Port | Description                                               |
+|----------------------|------|-----------------------------------------------------------|
+| qui WebUI            | 5252 | The web interface you access in your browser              |
 | qBittorrent internal | 8085 | Internal port used by qui to communicate with qBittorrent |
-| Peer traffic | 6881 | BitTorrent peer connections (inside VPN) |
-| Exporter | 9713 | Prometheus metrics |
+| Peer traffic         | 6881 | BitTorrent peer connections (inside VPN)                  |
+| Exporter             | 9713 | Prometheus metrics                                        |
 
 **First-time setup:** After deployment, open `{URL}:5252` in your browser.
 qui will ask you to configure the qBittorrent connection on first run. Point it
