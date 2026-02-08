@@ -151,18 +151,17 @@ To discover what indexers, download clients, or applications are available for
 configuration, use the `nixarr` CLI:
 
 ```bash
-# Show available Prowlarr indexer schemas
-sudo nixarr show-prowlarr-schemas indexer | jq '.[].sort_name'
+  # Show available Prowlarr indexer schemas
+  sudo nixarr show-prowlarr-schemas indexer | jq '.[].sort_name'
 
-# Show Prowlarr application schemas
-sudo nixarr show-prowlarr-schemas application | jq '.[].implementation'
+  # Show Prowlarr application schemas
+  sudo nixarr show-prowlarr-schemas application | jq '.[].implementation'
 
-# Show Sonarr download client schemas
-sudo nixarr show-sonarr-schemas download_client | jq '.[].implementation'
+  # Show Sonarr download client schemas
+  sudo nixarr show-sonarr-schemas download_client | jq '.[].implementation'
 
-# Show Radarr download client schemas
-sudo nixarr show-radarr-schemas download_client | jq '.[].implementation'
-```
+  # Show Radarr download client schemas
+  sudo nixarr show-radarr-schemas download_client | jq '.[].implementation'
 
 ### Requirements
 
