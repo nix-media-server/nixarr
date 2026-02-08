@@ -99,82 +99,12 @@ in {
   };
 
   config = let
-    ini-file-target = "${cfg.stateDir}/sabnzbd.ini";
     concatStringsCommaIfExists = with lib.strings;
       stringList: (
         optionalString (builtins.length stringList > 0) (
           concatStringsSep "," stringList
         )
       );
-
-    user-configs = {
-      misc = {
-        host =
-          if cfg.openFirewall
-          then "0.0.0.0"
-          else if cfg.vpn.enable
-          then "192.168.15.1"
-          else "127.0.0.1";
-        port = cfg.guiPort;
-        download_dir = "${nixarr.mediaDir}/usenet/.incomplete";
-        complete_dir = "${nixarr.mediaDir}/usenet/manual";
-        dirscan_dir = "${nixarr.mediaDir}/usenet/watch";
-        host_whitelist = concatStringsCommaIfExists cfg.whitelistHostnames;
-        local_ranges = concatStringsCommaIfExists cfg.whitelistRanges;
-        permissions = "775";
-      };
-    };
-
-    ini-base-config-file = pkgs.writeTextFile {
-      name = "base-config.ini";
-      text = lib.generators.toINI {} user-configs;
-    };
-
-    fix-config-permissions-script = pkgs.writeShellApplication {
-      name = "sabnzbd-fix-config-permissions";
-      runtimeInputs = with pkgs; [util-linux];
-      text = ''
-        if [ ! -f ${ini-file-target} ]; then
-          echo 'FAILURE: cannot change permissions of ${ini-file-target}, file does not exist'
-          exit 1
-        fi
-
-        chmod 600 ${ini-file-target}
-        chown ${globals.sabnzbd.user}:${globals.sabnzbd.group} ${ini-file-target}
-      '';
-    };
-
-    user-configs-to-python-list = with lib;
-      attrsets.collect (f: !builtins.isAttrs f) (
-        attrsets.mapAttrsRecursive (
-          path: value:
-            "sab_config_map['"
-            + (lib.strings.concatStringsSep "']['" path)
-            + "'] = '"
-            + (builtins.toString value)
-            + "'"
-        )
-        user-configs
-      );
-
-    apply-user-configs-script =
-      pkgs.writers.writePython3Bin "sabnzbd-set-user-values" {
-        libraries = [pkgs.python3Packages.configobj];
-      } ''
-        # flake8: noqa
-        from pathlib import Path
-        from configobj import ConfigObj
-
-        sab_config_path = Path("${ini-file-target}")
-        if not sab_config_path.is_file() or sab_config_path.suffix != ".ini":
-            raise Exception(f"{sab_config_path} is not a valid config file path.")
-
-        sab_config_map = ConfigObj(str(sab_config_path))
-
-        ${lib.strings.concatStringsSep "\n" user-configs-to-python-list}
-
-        sab_config_map.write()
-      '';
   in
     mkIf (nixarr.enable && cfg.enable) {
       assertions = [
@@ -196,39 +126,49 @@ in {
         };
       };
 
-      systemd.tmpfiles.rules = [
-        "d '${cfg.stateDir}' 0700 ${globals.sabnzbd.user} root - -"
-        "C ${cfg.stateDir}/sabnzbd.ini - - - - ${ini-base-config-file}"
-
-        # Media dirs
-        "d '${nixarr.mediaDir}/usenet'             0755 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/.incomplete' 0755 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/.watch'      0755 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/manual'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/lidarr'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/radarr'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/sonarr'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/readarr'     0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-      ];
+      systemd.tmpfiles.settings."10-nixarr-sabnzbd" = let
+        sabnzbd-rule = perms: {
+          user = globals.sabnzbd.user;
+          group = globals.libraryOwner.group;
+          mode = perm;
+        };
+      in {
+        "${nixarr.mediaDir}/usenet".d = sabnzbd-rule "0755";
+        "${nixarr.mediaDir}/usenet/.incomplete".d = sabnzbd-rule "0755";
+        "${nixarr.mediaDir}/usenet/.watch".d = sabnzbd-rule "0755";
+        "${nixarr.mediaDir}/usenet/manual".d = sabnzbd-rule "0775";
+        "${nixarr.mediaDir}/usenet/lidarr".d = sabnzbd-rule "0775";
+        "${nixarr.mediaDir}/usenet/radarr".d = sabnzbd-rule "0775";
+        "${nixarr.mediaDir}/usenet/sonarr".d = sabnzbd-rule "0775";
+        "${nixarr.mediaDir}/usenet/readarr".d = sabnzbd-rule "0775";
+      };
 
       services.sabnzbd = {
         enable = true;
         package = cfg.package;
         user = globals.sabnzbd.user;
         group = globals.sabnzbd.group;
-        configFile = "${cfg.stateDir}/sabnzbd.ini";
+
+        settings = {
+          misc = {
+            host =
+              if cfg.openFirewall
+              then "0.0.0.0"
+              else if cfg.vpn.enable
+              then "192.168.15.1"
+              else "127.0.0.1";
+            port = cfg.guiPort;
+            download_dir = "${nixarr.mediaDir}/usenet/.incomplete";
+            complete_dir = "${nixarr.mediaDir}/usenet/manual";
+            dirscan_dir = "${nixarr.mediaDir}/usenet/watch";
+            host_whitelist = concatStringsCommaIfExists cfg.whitelistHostnames;
+            local_ranges = concatStringsCommaIfExists cfg.whitelistRanges;
+            permissions = "775";
+          };
+        };
       };
 
       networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [cfg.guiPort];
-
-      systemd.services.sabnzbd.serviceConfig = {
-        ExecStartPre = lib.mkBefore [
-          ("+" + fix-config-permissions-script + "/bin/sabnzbd-fix-config-permissions")
-          (apply-user-configs-script + "/bin/sabnzbd-set-user-values")
-        ];
-        Restart = "on-failure";
-        StartLimitBurst = 5;
-      };
 
       # Enable and specify VPN namespace to confine service in.
       systemd.services.sabnzbd.vpnConfinement = mkIf cfg.vpn.enable {
