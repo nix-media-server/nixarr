@@ -117,15 +117,15 @@ a Prometheus server.
 
 **Default exporter ports:**
 
-| Exporter | Port | Description |
-|----------|------|-------------|
-| Sonarr | 9707 | TV show manager metrics |
-| Radarr | 9708 | Movie manager metrics |
-| Lidarr | 9709 | Music manager metrics |
-| Readarr | 9710 | Book manager metrics |
-| Prowlarr | 9711 | Indexer manager metrics |
-| qBittorrent | 9713 | Torrent client metrics |
-| WireGuard | 9586 | VPN tunnel metrics |
+| Exporter    | Port | Description             |
+|-------------|------|-------------------------|
+| Sonarr      | 9707 | TV show manager metrics |
+| Radarr      | 9708 | Movie manager metrics   |
+| Lidarr      | 9709 | Music manager metrics   |
+| Readarr     | 9710 | Book manager metrics    |
+| Prowlarr    | 9711 | Indexer manager metrics |
+| qBittorrent | 9713 | Torrent client metrics  |
+| WireGuard   | 9586 | VPN tunnel metrics      |
 
 **VPN-aware exporters:** If a service runs through the VPN (e.g., Sonarr with
 `vpn.enable = true`), its exporter is automatically confined to the VPN
