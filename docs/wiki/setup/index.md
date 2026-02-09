@@ -65,22 +65,22 @@ Instead of manually adding download clients, you can configure them
 declaratively:
 
 ```nix
-nixarr.radarr.settings-sync = {
-  # Automatically add Transmission with the correct settings
-  transmission.enable = true;
+  nixarr.radarr.settings-sync = {
+    # Automatically add Transmission with the correct settings
+    transmission.enable = true;
 
-  # Or add custom download clients
-  downloadClients = [
-    {
-      name = "NZBGet";
-      implementation = "Nzbget";
-      fields = {
-        host = "localhost";
-        port = 6789;
-      };
-    }
-  ];
-};
+    # Or add custom download clients
+    downloadClients = [
+      {
+        name = "NZBGet";
+        implementation = "Nzbget";
+        fields = {
+          host = "localhost";
+          port = 6789;
+        };
+      }
+    ];
+  };
 ```
 
 To see available download client schemas, run:
@@ -114,23 +114,23 @@ Instead of manually adding download clients, you can configure them
 declaratively:
 
 ```nix
-nixarr.sonarr.settings-sync = {
-  # Automatically add Transmission with the correct settings
-  transmission.enable = true;
+  nixarr.sonarr.settings-sync = {
+    # Automatically add Transmission with the correct settings
+    transmission.enable = true;
 
-  # Or add custom download clients
-  downloadClients = [
-    {
-      name = "SABnzbd";
-      implementation = "Sabnzbd";
-      fields = {
-        host = "localhost";
-        port = 8080;
-        apiKey.secret = "/data/.secret/sabnzbd-api-key";
-      };
-    }
-  ];
-};
+    # Or add custom download clients
+    downloadClients = [
+      {
+        name = "SABnzbd";
+        implementation = "Sabnzbd";
+        fields = {
+          host = "localhost";
+          port = 8080;
+          apiKey.secret = "/data/.secret/sabnzbd-api-key";
+        };
+      }
+    ];
+  };
 ```
 
 To see available download client schemas, run:
@@ -232,15 +232,15 @@ Define your indexers directly in Nix. Use `sort_name` to reference the indexer
 definition, and pass secrets via file references:
 
 ```nix
-nixarr.prowlarr.settings-sync.indexers = [
-  {
-    sort_name = "nzbgeek";
-    tags = [ "usenet" ];
-    fields = {
-      apiKey.secret = "/path/to/api/key";
-    };
-  }
-];
+  nixarr.prowlarr.settings-sync.indexers = [
+    {
+      sort_name = "nzbgeek";
+      tags = [ "usenet" ];
+      fields = {
+        apiKey.secret = "/path/to/api/key";
+      };
+    }
+  ];
 ```
 
 To find available indexer schemas, run:
@@ -259,18 +259,18 @@ Define tags to be created in Prowlarr:
 Add non-Nixarr-managed applications:
 
 ```nix
-nixarr.prowlarr.settings-sync.apps = [
-  {
-    name = "External Sonarr";
-    implementation = "Sonarr";
-    tags = [ "external" ];
-    fields = {
-      baseUrl = "http://192.168.1.100:8989";
-      apiKey.secret = "/path/to/external-sonarr-api-key";
-      prowlarrUrl = "http://localhost:9696";
-    };
-  }
-];
+  nixarr.prowlarr.settings-sync.apps = [
+    {
+      name = "External Sonarr";
+      implementation = "Sonarr";
+      tags = [ "external" ];
+      fields = {
+        baseUrl = "http://192.168.1.100:8989";
+        apiKey.secret = "/path/to/external-sonarr-api-key";
+        prowlarrUrl = "http://localhost:9696";
+      };
+    }
+  ];
 ```
 
 ## qBittorrent
@@ -290,21 +290,21 @@ modern proxy frontend.
 **Configuration example**:
 
 ```nix
-nixarr.qbittorrent = {
-  enable = true;
-  vpn.enable = true;
-  peerPort = 50000;
+  nixarr.qbittorrent = {
+    enable = true;
+    vpn.enable = true;
+    peerPort = 50000;
 
-  # Disable DHT/PeX for private trackers (optional)
-  # privateTrackers.disableDhtPex = true;
+    # Disable DHT/PeX for private trackers (optional)
+    # privateTrackers.disableDhtPex = true;
 
-  # Extra configuration merged into qBittorrent.conf
-  extraConfig = {
-    BitTorrent = {
-      "Session\\MaxActiveDownloads" = 3;
+    # Extra configuration merged into qBittorrent.conf
+    extraConfig = {
+      BitTorrent = {
+        "Session\\MaxActiveDownloads" = 3;
+      };
     };
   };
-};
 ```
 
 **Download directories**: qBittorrent downloads to `/data/media/qbittorrent/`
@@ -335,10 +335,10 @@ namespace with nginx proxies so metrics remain accessible from the host.
 **Customize per-service exporters**:
 
 ```nix
-# Disable a specific exporter
-nixarr.lidarr.exporter.enable = false;
+  # Disable a specific exporter
+  nixarr.lidarr.exporter.enable = false;
 
-# Change port or listen address
-nixarr.sonarr.exporter.port = 9800;
-nixarr.radarr.exporter.listenAddr = "127.0.0.1";
+  # Change port or listen address
+  nixarr.sonarr.exporter.port = 9800;
+  nixarr.radarr.exporter.listenAddr = "127.0.0.1";
 ```
