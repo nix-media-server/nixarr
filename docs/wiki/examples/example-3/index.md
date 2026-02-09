@@ -162,14 +162,15 @@ configuration, use the `nixarr` CLI:
 
   # Show Radarr download client schemas
   sudo nixarr show-radarr-schemas download_client | jq '.[].implementation'
+```
 
 ### Requirements
 
-For Prowlarr settings-sync to work, authentication must be set to allow local
-API access. This is typically already the default:
+For settings-sync to work, authentication must be set to allow local
+API access:
 
 ```nix
-services.prowlarr.settings.auth.required = "DisabledForLocalAddresses";
-services.sonarr.settings.auth.required = "DisabledForLocalAddresses";
-services.radarr.settings.auth.required = "DisabledForLocalAddresses";
+  services.prowlarr.settings.auth.required = "DisabledForLocalAddresses";
+  services.sonarr.settings.auth.required = "DisabledForLocalAddresses";
+  services.radarr.settings.auth.required = "DisabledForLocalAddresses";
 ```

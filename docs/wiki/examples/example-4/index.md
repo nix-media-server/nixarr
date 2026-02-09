@@ -134,20 +134,20 @@ from the host.
 
 **Example Prometheus scrape config:**
 
-```yaml
-scrape_configs:
-  - job_name: 'sonarr'
-    static_configs:
-      - targets: ['your-server:9707']
-  - job_name: 'radarr'
-    static_configs:
-      - targets: ['your-server:9708']
-  - job_name: 'qbittorrent'
-    static_configs:
-      - targets: ['your-server:9713']
-  - job_name: 'wireguard'
-    static_configs:
-      - targets: ['your-server:9586']
+```yaml {.numberLines}
+  scrape_configs:
+    - job_name: 'sonarr'
+      static_configs:
+        - targets: ['your-server:9707']
+    - job_name: 'radarr'
+      static_configs:
+        - targets: ['your-server:9708']
+    - job_name: 'qbittorrent'
+      static_configs:
+        - targets: ['your-server:9713']
+    - job_name: 'wireguard'
+      static_configs:
+        - targets: ['your-server:9586']
 ```
 
 You can customize per-service exporter settings:

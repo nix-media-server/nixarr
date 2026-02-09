@@ -85,7 +85,7 @@ nixarr.radarr.settings-sync = {
 
 To see available download client schemas, run:
 ```bash
-sudo nixarr show-radarr-schemas download_client | jq '.[].implementation'
+  sudo nixarr show-radarr-schemas download_client | jq '.[].implementation'
 ```
 
 ## Sonarr
@@ -135,7 +135,7 @@ nixarr.sonarr.settings-sync = {
 
 To see available download client schemas, run:
 ```bash
-sudo nixarr show-sonarr-schemas download_client | jq '.[].implementation'
+  sudo nixarr show-sonarr-schemas download_client | jq '.[].implementation'
 ```
 
 ## Jellyseerr
@@ -175,21 +175,21 @@ Instead of manually configuring the Sonarr and Radarr connections, you can set
 them up declaratively:
 
 ```nix
-nixarr.bazarr.settings-sync = {
-  # Automatically configure the Sonarr connection
-  sonarr.enable = true;
-  sonarr.config = {
-    # Only sync subtitles for monitored content (optional)
-    sync_only_monitored_series = true;
-    sync_only_monitored_episodes = true;
-  };
+  nixarr.bazarr.settings-sync = {
+    # Automatically configure the Sonarr connection
+    sonarr.enable = true;
+    sonarr.config = {
+      # Only sync subtitles for monitored content (optional)
+      sync_only_monitored_series = true;
+      sync_only_monitored_episodes = true;
+    };
 
-  # Automatically configure the Radarr connection
-  radarr.enable = true;
-  radarr.config = {
-    sync_only_monitored_movies = true;
+    # Automatically configure the Radarr connection
+    radarr.enable = true;
+    radarr.config = {
+      sync_only_monitored_movies = true;
+    };
   };
-};
 ```
 
 API keys and ports are filled in automatically from Nixarr's configuration.
@@ -214,17 +214,17 @@ Instead of manually configuring Prowlarr, you can use the `nixarr.prowlarr.setti
 Automatically sync your enabled *Arr applications (Sonarr, Radarr, Lidarr, Readarr, Readarr-Audiobook, Whisparr) to Prowlarr:
 
 ```nix
-nixarr.prowlarr.settings-sync.enable-nixarr-apps = true;
+  nixarr.prowlarr.settings-sync.enable-nixarr-apps = true;
 ```
 
 You can also enable individual apps:
 
 ```nix
-nixarr.prowlarr.settings-sync = {
-  sonarr.enable = true;
-  radarr.enable = true;
-  # lidarr, readarr, readarr-audiobook, whisparr also available
-};
+  nixarr.prowlarr.settings-sync = {
+    sonarr.enable = true;
+    radarr.enable = true;
+    # lidarr, readarr, readarr-audiobook, whisparr also available
+  };
 ```
 
 **Configure Indexers**:
@@ -245,14 +245,14 @@ nixarr.prowlarr.settings-sync.indexers = [
 
 To find available indexer schemas, run:
 ```bash
-sudo nixarr show-prowlarr-schemas indexer | jq '.[].sort_name'
+  sudo nixarr show-prowlarr-schemas indexer | jq '.[].sort_name'
 ```
 
 **Manage Tags**:
 Define tags to be created in Prowlarr:
 
 ```nix
-nixarr.prowlarr.settings-sync.tags = [ "usenet" "torrent" "private" ];
+  nixarr.prowlarr.settings-sync.tags = [ "usenet" "torrent" "private" ];
 ```
 
 **Add Custom Applications**:
@@ -318,7 +318,7 @@ a separate Prometheus server to scrape the metrics.
 **Enable all exporters**:
 
 ```nix
-nixarr.exporters.enable = true;
+  nixarr.exporters.enable = true;
 ```
 
 This configures:
