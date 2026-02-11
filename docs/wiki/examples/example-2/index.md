@@ -2,14 +2,21 @@
 title: Example Configuration Where Port Forwarding Is Not an Option
 ---
 
+<<<<<<< Updated upstream
 An example where port forwarding is not an option. This is useful if,
 for example, you're living in a dorm that does not allow it. This
 example does the following:
+=======
+An example where port forwarding is not an option. This is useful if, for
+example, you're living in a dorm that does not allow it. The example assumes you
+have a VPN-provider that allows for port-forwarding. This example does the
+following:
+>>>>>>> Stashed changes
 
 - Runs Jellyfin
-- Starts openssh and runs it through the VPN so that it can be accessed
-  outside your home network
-- Runs all the supported "*Arrs"
+- Starts openssh and runs it through the VPN so that it can be accessed outside
+  your home network
+- Runs all the supported "\*Arrs"
 
 ```nix {.numberLines}
   nixarr = {
@@ -57,12 +64,12 @@ example does the following:
 ```
 
 This example uses SSH tunneling to expose most of your services. See the
-[expose](/wiki/expose) wiki page for more info on how to safely access
-your services.
+[expose](/wiki/expose) wiki page for more info on how to safely access your
+services.
 
 In this example, you don't have access to any services without being on your
-home network or accessing them through localhost. If you have SSH setup you
-can use SSH tunneling. Simply run:
+home network or accessing them through localhost. If you have SSH setup you can
+use SSH tunneling. Simply run:
 
 ```sh
   ssh -N user@ip \
@@ -76,5 +83,5 @@ can use SSH tunneling. Simply run:
     -L 6008:localhost:8096
 ```
 
-Replace `user` with your user and `ip` with the VPN ip. This lets you access
-the services on `localhost:6001` through `localhost:6008`.
+Replace `user` with your user and `ip` with the VPN ip. This lets you access the
+services on `localhost:6001` through `localhost:6008`.

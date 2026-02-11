@@ -16,5 +16,5 @@ This is an index of existing articles:
   - **[Running Services Not Covered by Nixarr Through a VPN](/wiki/vpn/uncovered-services)**
   - **[Opening Ports](/wiki/vpn/ports)**
 
-For learning how to setup the "*Arrs", once running, refer to the [servarr
-wiki](https://wiki.servarr.com/)
+For learning how to setup the "\*Arrs", once running, refer to the
+[servarr wiki](https://wiki.servarr.com/)

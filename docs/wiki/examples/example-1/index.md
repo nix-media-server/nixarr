@@ -6,7 +6,7 @@ This example does the following:
 
 - Runs a jellyfin server and exposes it to the internet with HTTPS support.
 - Runs the transmission torrent client through a vpn
-- Runs all "*Arrs" supported by this module
+- Runs all "\*Arrs" supported by this module
 
 ```nix {.numberLines}
   nixarr = {
