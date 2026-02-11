@@ -2,19 +2,19 @@
 title: Running Services Not Covered by Nixarr Through a VPN
 ---
 
-Nixarr reexports its VPN-submodule, meaning you can run your own services
-using it. As an example, let's say you want to run a Monero node
-through a VPN, then you could use the following configuration:
+Nixarr reexports its VPN-submodule, meaning you can run your own services using
+it. As an example, let's say you want to run a Monero node through a VPN, then
+you could use the following configuration:
 
 ```nix {.numberLines}
   # Open vpnports, must also be opened by VPN-provider
   vpnnamespaces.wg = {
-    openVPNPorts = [ 
+    openVPNPorts = [
       { port = xmrP2PPort; protocol = "both"; }
       { port = xmrRpcPort; protocol = "both"; }
     ];
   };
-  
+
   # Force moneronode to VPN
   systemd.services.monero.vpnconfinement = {
     enable = true;
@@ -46,8 +46,8 @@ through a VPN, then you could use the following configuration:
   };
 ```
 
-> **Note:** that the submodule supports more namespaces than just one, but Nixarr
-> uses the name `wg`, so you should use that too.
+> **Note:** that the submodule supports more namespaces than just one, but
+> Nixarr uses the name `wg`, so you should use that too.
 
 Services running over the VPN will have address `192.168.15.1` instead of
 `127.0.0.1`. For more options and information on the VPN-submodule, check out

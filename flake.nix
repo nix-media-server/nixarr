@@ -6,6 +6,9 @@
 
     vpnconfinement.url = "github:Maroka-chan/VPN-Confinement";
 
+    treefmt-nix.url = "github:numtide/treefmt-nix";
+    treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
+
     website-builder.url = "github:rasmus-kirk/website-builder";
     website-builder.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -13,6 +16,7 @@
   outputs = {
     nixpkgs,
     vpnconfinement,
+    treefmt-nix,
     website-builder,
     self,
     ...
@@ -124,6 +128,8 @@
       }
     );
 
-    formatter = forAllSystems ({pkgs}: pkgs.alejandra);
+    formatter =
+      forAllSystems ({pkgs}:
+        treefmt-nix.lib.mkWrapper pkgs ./util/formatting);
   };
 }

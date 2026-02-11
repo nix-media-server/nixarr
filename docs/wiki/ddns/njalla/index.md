@@ -6,9 +6,9 @@ Go to your domain on njalla:
 
 ![Njalla Domain](domain.png)
 
-Then press "Add record", select "Dynamic" and write your subdomain in the
-input box. It should now be added to your records. Click on the record,
-you should now see something like the following:
+Then press "Add record", select "Dynamic" and write your subdomain in the input
+box. It should now be added to your records. Click on the record, you should now
+see something like the following:
 
 ![Njalla Record](record.png)
 
@@ -16,7 +16,7 @@ Given this, your JSON file should contain the following:
 
 ```json
   {
-    "jellyfin.example.com": "48esqclnvqGiCZPbd"
+  "jellyfin.example.com": "48esqclnvqGiCZPbd"
   }
 ```
 
@@ -24,9 +24,9 @@ Add the above as a secret file to your secrets (See [this page](/wiki/secrets)
 for secrets management). As an example, here is one way of accomplishing it:
 
 - Write the specified JSON to `/data/.secret/njalla/keys-file.json`
-- Set the owner as root: 
+- Set the owner as root:
   - `sudo chown root:root /data/.secret/njalla/keys-file.json`
-- Set the permissions to 700 (read, write, execute for file owner, root): 
+- Set the permissions to 700 (read, write, execute for file owner, root):
   - `sudo chmod 700 /data/.secret/njalla/keys-file.json`
 
 And finally add the secret file to your nix configuration:
@@ -58,9 +58,9 @@ Where you should see something like:
 Then run the following to get your public IP address:
 
 ```sh
-  curl https://ipv4.icanhazip.com/ 
+  curl https://ipv4.icanhazip.com/
 ```
 
-And if you check your njalla domain page, you should see your public IP
-on your Dynamic DNS record! After waiting a little you should be able to
-connect to your ip, using the set domain.
+And if you check your njalla domain page, you should see your public IP on your
+Dynamic DNS record! After waiting a little you should be able to connect to your
+ip, using the set domain.
