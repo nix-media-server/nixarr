@@ -15,5 +15,6 @@
     command = "${pkgs.bash}/bin/bash";
     options = ["${./indent-codeblocks.sh}"];
     includes = ["*.md"];
+    priority = 1;
   };
 }

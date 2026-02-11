@@ -59,8 +59,6 @@ already set. See the following links for more info:
 - Go to {URL}:7878/settings/mediamanagement and set `Unmonitor Deleted Movies`
   to true.
 
-<<<<<<< Updated upstream
-=======
 ### Declarative Download Clients
 
 Instead of manually adding download clients, you can configure them
@@ -91,7 +89,6 @@ To see available download client schemas, run:
   sudo nixarr show-radarr-schemas download_client | jq '.[].implementation'
 ```
 
->>>>>>> Stashed changes
 ## Sonarr
 
 - Open your browser and go to `{URL}:8989`.
@@ -112,8 +109,6 @@ To see available download client schemas, run:
 - Go to {URL}:8989/settings/mediamanagement and set `Unmonitor Deleted Episodes`
   to true.
 
-<<<<<<< Updated upstream
-=======
 ### Declarative Download Clients
 
 Instead of manually adding download clients, you can configure them
@@ -145,7 +140,6 @@ To see available download client schemas, run:
   sudo nixarr show-sonarr-schemas download_client | jq '.[].implementation'
 ```
 
->>>>>>> Stashed changes
 ## Jellyseerr
 
 - Open your browser and go to `{URL}:5055`.
@@ -177,8 +171,6 @@ To see available download client schemas, run:
 - Go to "Settings" > "Subtitles" > "Audio Synchronization / Alignment" and
   enable "Automatic Subtitles Audio Synchronization"
 
-<<<<<<< Updated upstream
-=======
 ### Declarative Configuration
 
 Instead of manually configuring the Sonarr and Radarr connections, you can set
@@ -205,7 +197,6 @@ them up declaratively:
 API keys and ports are filled in automatically from Nixarr's configuration. You
 still need to manually configure languages and subtitle providers.
 
->>>>>>> Stashed changes
 ## Prowlarr
 
 **Initial setup**:
@@ -216,8 +207,6 @@ still need to manually configure languages and subtitle providers.
   - You can now log in.
 - Go to "Settings" > "Apps" and add your _Arrs_.
   - Get the API key by typing `sudo nixarr list-api-keys` in your terminal.
-<<<<<<< Updated upstream
-=======
 
 ### Declarative Configuration
 
@@ -355,4 +344,3 @@ namespace with nginx proxies so metrics remain accessible from the host.
   nixarr.sonarr.exporter.port = 9800;
   nixarr.radarr.exporter.listenAddr = "127.0.0.1";
 ```
->>>>>>> Stashed changes

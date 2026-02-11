@@ -135,7 +135,7 @@ the host.
 **Example Prometheus scrape config:**
 
 ```yaml {.numberLines}
-scrape_configs:
+  scrape_configs:
   - job_name: "sonarr"
     static_configs:
       - targets: ["your-server:9707"]

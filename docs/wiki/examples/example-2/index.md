@@ -2,16 +2,10 @@
 title: Example Configuration Where Port Forwarding Is Not an Option
 ---
 
-<<<<<<< Updated upstream
-An example where port forwarding is not an option. This is useful if,
-for example, you're living in a dorm that does not allow it. This
-example does the following:
-=======
 An example where port forwarding is not an option. This is useful if, for
 example, you're living in a dorm that does not allow it. The example assumes you
 have a VPN-provider that allows for port-forwarding. This example does the
 following:
->>>>>>> Stashed changes
 
 - Runs Jellyfin
 - Starts openssh and runs it through the VPN so that it can be accessed outside

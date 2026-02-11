@@ -15,9 +15,9 @@ see something like the following:
 Given this, your JSON file should contain the following:
 
 ```json
-{
+  {
   "jellyfin.example.com": "48esqclnvqGiCZPbd"
-}
+  }
 ```
 
 Add the above as a secret file to your secrets (See [this page](/wiki/secrets)

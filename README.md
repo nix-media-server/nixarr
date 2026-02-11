@@ -13,18 +13,6 @@ that I will remove or change options in a non-backwards-compatible way.
 
 - **Run services through a VPN:** You can run any service that this module
   supports through a VPN, fx `nixarr.transmission.vpn.enable = true;`
-<<<<<<< Updated upstream
-- **Automatic Directories, Users and Permissions:** The module automatically
-  creates directories and users for your media library. It also sets sane
-  permissions.
-- **State Management:** All services support state management and all state
-  that they manage is located by default in `/data/.state/nixarr/*`. This means
-  that you only have to backup your media directory and `/data/.state/nixarr`.
-- **Optional Dynamic DNS support:** If you use [Njalla](https://njal.la/)
-  and don't have a static IP, you can use the `nixarr.ddns.njalla.enable`
-  option to dynamically update a DNS record that points to the dynamic public
-  IP of your server or your public VPN IP.
-=======
 - **Declarative Settings Sync:** Configure Prowlarr indexers/apps, Sonarr/Radarr
   download clients, and Bazarr connections directly in Nix -- no manual UI setup
   required. See the
@@ -42,7 +30,6 @@ that I will remove or change options in a non-backwards-compatible way.
   don't have a static IP, you can use the `nixarr.ddns.njalla.enable` option to
   dynamically update a DNS record that points to the dynamic public IP of your
   server or your public VPN IP.
->>>>>>> Stashed changes
 - **Optional Automatic Port Forwarding:** This module has a UPNP support that
   lets services request ports from your router automatically, if you enable it.
 

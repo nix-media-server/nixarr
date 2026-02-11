@@ -1,7 +1,5 @@
 # Changelog
 
-<<<<<<< Updated upstream
-=======
 ## Unreleased
 
 Added:
@@ -76,7 +74,6 @@ Changed:
   otherwise. Except for the Transmission peer-port for which the firewall is
   disabled if the port is set.
 
->>>>>>> Stashed changes
 ## 2025-10-29
 
 Added:
