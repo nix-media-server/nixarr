@@ -59,6 +59,35 @@ already set. See the following links for more info:
 - Go to {URL}:7878/settings/mediamanagement and set `Unmonitor Deleted Movies`
   to true.
 
+### Declarative Download Clients
+
+Instead of manually adding download clients, you can configure them
+declaratively:
+
+```nix
+  nixarr.radarr.settings-sync = {
+    # Automatically add Transmission with the correct settings
+    transmission.enable = true;
+
+    # Or add custom download clients
+    downloadClients = [
+      {
+        name = "NZBGet";
+        implementation = "Nzbget";
+        fields = {
+          host = "localhost";
+          port = 6789;
+        };
+      }
+    ];
+  };
+```
+
+To see available download client schemas, run:
+```bash
+  sudo nixarr show-radarr-schemas download_client | jq '.[].implementation'
+```
+
 ## Sonarr
 
 - Open your browser and go to `{URL}:8989`.
@@ -78,6 +107,36 @@ already set. See the following links for more info:
 
 - Go to {URL}:8989/settings/mediamanagement and set `Unmonitor Deleted Episodes`
   to true.
+
+### Declarative Download Clients
+
+Instead of manually adding download clients, you can configure them
+declaratively:
+
+```nix
+  nixarr.sonarr.settings-sync = {
+    # Automatically add Transmission with the correct settings
+    transmission.enable = true;
+
+    # Or add custom download clients
+    downloadClients = [
+      {
+        name = "SABnzbd";
+        implementation = "Sabnzbd";
+        fields = {
+          host = "localhost";
+          port = 8080;
+          apiKey.secret = "/data/.secret/sabnzbd-api-key";
+        };
+      }
+    ];
+  };
+```
+
+To see available download client schemas, run:
+```bash
+  sudo nixarr show-sonarr-schemas download_client | jq '.[].implementation'
+```
 
 ## Jellyseerr
 
@@ -110,6 +169,32 @@ already set. See the following links for more info:
 - Go to "Settings" > "Subtitles" > "Audio Synchronization / Alignment" and enable "Automatic
   Subtitles Audio Synchronization"
 
+### Declarative Configuration
+
+Instead of manually configuring the Sonarr and Radarr connections, you can set
+them up declaratively:
+
+```nix
+  nixarr.bazarr.settings-sync = {
+    # Automatically configure the Sonarr connection
+    sonarr.enable = true;
+    sonarr.config = {
+      # Only sync subtitles for monitored content (optional)
+      sync_only_monitored_series = true;
+      sync_only_monitored_episodes = true;
+    };
+
+    # Automatically configure the Radarr connection
+    radarr.enable = true;
+    radarr.config = {
+      sync_only_monitored_movies = true;
+    };
+  };
+```
+
+API keys and ports are filled in automatically from Nixarr's configuration.
+You still need to manually configure languages and subtitle providers.
+
 ## Prowlarr
 
 **Initial setup**:
@@ -126,29 +211,134 @@ already set. See the following links for more info:
 Instead of manually configuring Prowlarr, you can use the `nixarr.prowlarr.settings-sync` options to declaratively manage your configuration.
 
 **Sync Applications**:
-Automatically sync your enabled Arr applications (Sonarr, Radarr, Lidarr, Readar, Readarr-Audiobook) to Prowlarr:
+Automatically sync your enabled *Arr applications (Sonarr, Radarr, Lidarr, Readarr, Readarr-Audiobook, Whisparr) to Prowlarr:
 
 ```nix
-nixarr.prowlarr.settings-sync.enable-nixarr-apps = true;
+  nixarr.prowlarr.settings-sync.enable-nixarr-apps = true;
+```
+
+You can also enable individual apps:
+
+```nix
+  nixarr.prowlarr.settings-sync = {
+    sonarr.enable = true;
+    radarr.enable = true;
+    # lidarr, readarr, readarr-audiobook, whisparr also available
+  };
 ```
 
 **Configure Indexers**:
-Define your indexers directly in Nix:
+Define your indexers directly in Nix. Use `sort_name` to reference the indexer
+definition, and pass secrets via file references:
 
 ```nix
-nixarr.prowlarr.settings-sync.indexers = [
-  {
-    sort_name = "nzbgeek";
-    fields = {
-      apiKey.secret = "/path/to/api/key";
-    };
-  }
-];
+  nixarr.prowlarr.settings-sync.indexers = [
+    {
+      sort_name = "nzbgeek";
+      tags = [ "usenet" ];
+      fields = {
+        apiKey.secret = "/path/to/api/key";
+      };
+    }
+  ];
+```
+
+To find available indexer schemas, run:
+```bash
+  sudo nixarr show-prowlarr-schemas indexer | jq '.[].sort_name'
 ```
 
 **Manage Tags**:
 Define tags to be created in Prowlarr:
 
 ```nix
-nixarr.prowlarr.settings-sync.tags = [ "iso" "remux" ];
+  nixarr.prowlarr.settings-sync.tags = [ "usenet" "torrent" "private" ];
+```
+
+**Add Custom Applications**:
+Add non-Nixarr-managed applications:
+
+```nix
+  nixarr.prowlarr.settings-sync.apps = [
+    {
+      name = "External Sonarr";
+      implementation = "Sonarr";
+      tags = [ "external" ];
+      fields = {
+        baseUrl = "http://192.168.1.100:8989";
+        apiKey.secret = "/path/to/external-sonarr-api-key";
+        prowlarrUrl = "http://localhost:9696";
+      };
+    }
+  ];
+```
+
+## qBittorrent
+
+qBittorrent is an alternative to Transmission with a feature-rich WebUI.
+The [qui](https://github.com/autobrr/qui) WebUI is enabled by default as a
+modern proxy frontend.
+
+**First-time setup**:
+
+- Open your browser and go to `{URL}:5252`.
+- qui will ask you to configure the qBittorrent connection on first run:
+  - If using VPN: set the URL to `http://192.168.15.1:8085`
+  - If not using VPN: set the URL to `http://127.0.0.1:8085`
+- You can now manage your torrents through the qui interface.
+
+**Configuration example**:
+
+```nix
+  nixarr.qbittorrent = {
+    enable = true;
+    vpn.enable = true;
+    peerPort = 50000;
+
+    # Disable DHT/PeX for private trackers (optional)
+    # privateTrackers.disableDhtPex = true;
+
+    # Extra configuration merged into qBittorrent.conf
+    extraConfig = {
+      BitTorrent = {
+        "Session\\MaxActiveDownloads" = 3;
+      };
+    };
+  };
+```
+
+**Download directories**: qBittorrent downloads to `/data/media/qbittorrent/`
+with per-*Arr subdirectories (`radarr/`, `sonarr/`, `lidarr/`, `readarr/`).
+
+## Monitoring
+
+Nixarr can set up Prometheus exporters for all supported services. This requires
+a separate Prometheus server to scrape the metrics.
+
+**Enable all exporters**:
+
+```nix
+  nixarr.exporters.enable = true;
+```
+
+This configures:
+
+- **Exportarr** for Sonarr (`:9707`), Radarr (`:9708`), Lidarr (`:9709`),
+  Readarr (`:9710`), and Prowlarr (`:9711`)
+- **qBittorrent exporter** (`:9713`) if qBittorrent is enabled
+- **Node and systemd exporters** for system metrics
+- **WireGuard exporter** (`:9586`) if VPN is enabled
+
+Exporters for VPN-confined services are automatically placed in the VPN
+namespace with nginx proxies so metrics remain accessible from the host.
+
+**Customize per-service exporters**:
+
+```nix
+  # Disable a specific exporter
+  nixarr.lidarr.exporter.enable = false;
+
+  # Change port or listen address
+  nixarr.sonarr.exporter.port = 9800;
+  nixarr.radarr.exporter.listenAddr = "127.0.0.1";
 ```
