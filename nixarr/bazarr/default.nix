@@ -116,7 +116,7 @@ in {
         UMask = "0002";
         SyslogIdentifier = "bazarr";
         ExecStart = pkgs.writeShellScript "start-bazarr" ''
-          ${pkgs.bazarr}/bin/bazarr \
+          ${cfg.package}/bin/bazarr \
             --config '${cfg.stateDir}' \
             --port ${toString cfg.port} \
             --no-update True
