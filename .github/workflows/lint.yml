@@ -44,4 +44,4 @@ jobs:
 
       - uses: DeterminateSystems/magic-nix-cache-action@v8
 
-      - run: nix flake check
+      - run: nix flake check --max-jobs 1
