@@ -30,8 +30,7 @@ with lib; let
       while IFS=$'\t' read -r key val; do
         # For each key-value pair, execute the curl command
         # Replace `''${key}` and `''${val}` in the URL with the actual key and value.
-        curl -4 --connect-timeout 5 -s "https://njal.la/update/?h=''${key}&k=''${val}&auto" || echo "Error: Failed updating IPV4 record."
-        curl -6 --connect-timeout 5 -s "https://njal.la/update/?h=''${key}&k=''${val}&auto" || echo "Error: Failed updating IPV6 record."
+        curl --connect-timeout 5 -s "https://njal.la/update/?h=''${key}&k=''${val}&a=192.168.1.1&aaaa=::1"
       done < <(jq -r "$jq_command" "$json_file")
     '';
   };
