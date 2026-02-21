@@ -122,10 +122,6 @@ in {
       dataDir = cfg.stateDir;
     };
 
-    # # Set UMask to 0002 so directories are created with group write permission (775)
-    # # This allows other services in the media group (like Jellyfin) to modify files
-    # systemd.services.radarr.serviceConfig.UMask = "0002";
-
     # Enable and specify VPN namespace to confine service in.
     systemd.services.radarr.vpnConfinement = mkIf cfg.vpn.enable {
       enable = true;
