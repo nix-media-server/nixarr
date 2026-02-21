@@ -30,7 +30,7 @@ with lib; let
       while IFS=$'\t' read -r key val; do
         # For each key-value pair, execute the curl command
         # Replace `''${key}` and `''${val}` in the URL with the actual key and value.
-        curl -s "https://njal.la/update/?h=''${key}&k=''${val}&auto"
+        curl --connect-timeout 5 -s "https://njal.la/update/?h=''${key}&k=''${val}&a=192.168.1.1&aaaa=::1"
       done < <(jq -r "$jq_command" "$json_file")
     '';
   };
@@ -45,7 +45,7 @@ in {
           description = ''
             **Required options:**
 
-            - [`nixarr.ddns.njalla.keysFile`](#nixarr.ddns.njalla.keysfile)
+            - [`nixarr.ddns.njalla.vpn.keysFile`](#nixarr.ddns.njalla.keysfile)
             - [`nixarr.vpn.enable`](#nixarr.vpn.enable)
 
             Whether or not to enable DDNS over VPN for a
