@@ -23,7 +23,7 @@ with lib; let
 
   # Generate qBittorrent configuration
   qbittorrentConfig =
-    {
+    lib.recursiveUpdate {
       BitTorrent = {
         # Download paths
         "Session\\DefaultSavePath" = downloadDir;
@@ -84,7 +84,7 @@ with lib; let
         "Downloads\\PreAllocation" = true; # Pre-allocate disk space
       };
     }
-    // cfg.extraConfig;
+    cfg.extraConfig;
 in {
   options.nixarr.qbittorrent = {
     enable = mkOption {
