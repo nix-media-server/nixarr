@@ -60,8 +60,10 @@ with lib; let
 
   servicesWithApiKeys = builtins.attrNames printServiceApiKey;
 
+  xq = getExe' pkgs.yq "xq";
+
   # Helper to create API key extraction for a service
-  mkApiKeyExtractor = serviceName: {
+  mkApiKeyExtractor = serviceName: cfgFilePath: printScript: {
     description = "Extract ${serviceName} API key";
     after = ["${serviceName}.service"];
     requires = ["${serviceName}.service"];
@@ -74,29 +76,66 @@ with lib; let
 
       ExecStartPre = [
         (pkgs.writeShellScript "wait-for-${serviceName}-config" ''
-          while [ ! -f '${serviceCfgFile.${serviceName}}' ]; do sleep 1; done
+          while [ ! -f '${cfgFilePath}' ]; do sleep 1; done
         '')
       ];
 
       ExecStart = pkgs.writeShellScript "extract-${serviceName}-api-key" ''
-        ${printServiceApiKey.${serviceName}} > '${cfg.stateDir}/api-keys/${serviceName}.key'
+        ${printScript} > '${cfg.stateDir}/api-keys/${serviceName}.key'
       '';
     };
   };
+
+  # Generate API key extractors for radarr/sonarr instances
+  mkInstanceApiKeys = service:
+    let
+      instancesCfg = cfg.${service}.instances;
+      enabledInstances = filterAttrs (_: inst: inst.enable) instancesCfg;
+    in
+      mapAttrsToList (name: inst:
+        let
+          instanceStateDir =
+            if inst.stateDir != null
+            then inst.stateDir
+            else "${cfg.${service}.stateDir}-${name}";
+          cfgFilePath = "${instanceStateDir}/config.xml";
+          serviceName = "${service}-${name}";
+          printScript = pkgs.writeShellScript "print-${serviceName}-api-key" ''
+            ${xq} -r .Config.ApiKey '${cfgFilePath}'
+          '';
+        in {
+          inherit serviceName cfgFilePath printScript;
+        }
+      ) enabledInstances;
+
+  radarrInstanceKeys = mkInstanceApiKeys "radarr";
+  sonarrInstanceKeys = mkInstanceApiKeys "sonarr";
+  allInstanceKeys = radarrInstanceKeys ++ sonarrInstanceKeys;
 in {
   config = mkIf cfg.enable {
     # Create per-service API key groups
     users.groups = mkMerge (
-      builtins.map
-      (serviceName: mkIf cfg.${serviceName}.enable {"${serviceName}-api" = {};})
-      servicesWithApiKeys
+      (builtins.map
+        (serviceName: mkIf cfg.${serviceName}.enable {"${serviceName}-api" = {};})
+        servicesWithApiKeys)
+      ++ (builtins.map
+        (inst: {"${inst.serviceName}-api" = {};})
+        allInstanceKeys)
     );
 
     systemd.services = mkMerge (
-      # Create API key extractors for enabled services
-      builtins.map
-      (serviceName: mkIf cfg.${serviceName}.enable {"${serviceName}-api-key" = mkApiKeyExtractor serviceName;})
-      servicesWithApiKeys
+      # Create API key extractors for enabled base services
+      (builtins.map
+        (serviceName: mkIf cfg.${serviceName}.enable {
+          "${serviceName}-api-key" = mkApiKeyExtractor serviceName serviceCfgFile.${serviceName} printServiceApiKey.${serviceName};
+        })
+        servicesWithApiKeys)
+      # Create API key extractors for instances
+      ++ (builtins.map
+        (inst: {
+          "${inst.serviceName}-api-key" = mkApiKeyExtractor inst.serviceName inst.cfgFilePath inst.printScript;
+        })
+        allInstanceKeys)
     );
 
     # Create the api-keys directory

@@ -68,6 +68,29 @@ with lib; let
     if cfg.configFile != null
     then cfg.configFile
     else generatedConfigFile;
+
+  # Collect enabled instances for radarr and sonarr
+  enabledInstanceNames = service:
+    builtins.attrNames (filterAttrs (_: inst: inst.enable) nixarr.${service}.instances);
+
+  # Convert instance name to env var suffix: "anime" -> "ANIME", "my-4k" -> "MY_4K"
+  toEnvName = name:
+    builtins.replaceStrings ["-"] ["_"] (lib.toUpper name);
+
+  radarrInstances = enabledInstanceNames "radarr";
+  sonarrInstances = enabledInstanceNames "sonarr";
+
+  instanceServiceDeps = service: names:
+    concatMap (name: ["${service}-${name}.service" "${service}-${name}-api-key.service"]) names;
+
+  instanceEnvLines = service: names:
+    concatMapStringsSep "" (name: ''
+      printf '${lib.toUpper service}_${toEnvName name}_API_KEY=' >> '${cfg.stateDir}/env'
+      cat '${nixarr.stateDir}/api-keys/${service}-${name}.key' >> '${cfg.stateDir}/env'
+    '') names;
+
+  instanceApiGroups = service: names:
+    map (name: "${service}-${name}-api") names;
 in {
   options.nixarr.recyclarr = {
     enable = mkOption {
@@ -105,7 +128,10 @@ in {
 
         The API keys for Radarr and Sonarr can be referenced in the config
         file using the `RADARR_API_KEY` and `SONARR_API_KEY` environment
-        variables (with macro `!env_var`).
+        variables (with macro `!env_var`). For additional instances, env vars
+        are named `RADARR_<NAME>_API_KEY` / `SONARR_<NAME>_API_KEY` where
+        `<NAME>` is the uppercased instance name with hyphens replaced by
+        underscores (e.g. `RADARR_ANIME_API_KEY`).
 
         Note: You cannot set both `configFile` and `configuration` options.
       '';
@@ -172,7 +198,8 @@ in {
         see the [official configuration reference](https://recyclarr.dev/wiki/yaml/config-reference/).
 
         The API keys for Radarr and Sonarr can be referenced using the `RADARR_API_KEY` and `SONARR_API_KEY`
-        environment variables (with the string "!env_var RADARR_API_KEY").
+        environment variables (with the string "!env_var RADARR_API_KEY"). For additional instances, env vars
+        are named `RADARR_<NAME>_API_KEY` / `SONARR_<NAME>_API_KEY` (e.g. `RADARR_ANIME_API_KEY`).
 
         Note: You cannot set both `configFile` and `configuration` options.
       '';
@@ -211,7 +238,9 @@ in {
         uid = globals.uids.${globals.recyclarr.user};
         extraGroups =
           (optional nixarr.radarr.enable "radarr-api")
-          ++ (optional nixarr.sonarr.enable "sonarr-api");
+          ++ (optional nixarr.sonarr.enable "sonarr-api")
+          ++ (instanceApiGroups "radarr" radarrInstances)
+          ++ (instanceApiGroups "sonarr" sonarrInstances);
       };
     };
 
@@ -227,10 +256,14 @@ in {
       before = ["recyclarr.service"];
       requires =
         (optionals nixarr.radarr.enable ["radarr.service" "radarr-api-key.service"])
-        ++ (optionals nixarr.sonarr.enable ["sonarr.service" "sonarr-api-key.service"]);
+        ++ (optionals nixarr.sonarr.enable ["sonarr.service" "sonarr-api-key.service"])
+        ++ (instanceServiceDeps "radarr" radarrInstances)
+        ++ (instanceServiceDeps "sonarr" sonarrInstances);
       after =
         (optionals nixarr.radarr.enable ["radarr.service" "radarr-api-key.service"])
-        ++ (optionals nixarr.sonarr.enable ["sonarr.service" "sonarr-api-key.service"]);
+        ++ (optionals nixarr.sonarr.enable ["sonarr.service" "sonarr-api-key.service"])
+        ++ (instanceServiceDeps "radarr" radarrInstances)
+        ++ (instanceServiceDeps "sonarr" sonarrInstances);
 
       serviceConfig = {
         Type = "oneshot";
@@ -248,6 +281,8 @@ in {
             printf SONARR_API_KEY= >> '${cfg.stateDir}/env'
             cat '${nixarr.stateDir}/api-keys/sonarr.key' >> '${cfg.stateDir}/env'
           ''}
+          ${instanceEnvLines "radarr" radarrInstances}
+          ${instanceEnvLines "sonarr" sonarrInstances}
         '';
       };
     };
