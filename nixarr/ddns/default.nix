@@ -24,13 +24,27 @@ with lib; let
       # The output will be a series of lines, each containing a key and a value separated by a tab.
       jq_command='to_entries[] | [.key, .value] | @tsv'
 
+      IP4=$(curl -s -4 --connect-timeout 5 https://icanhazip.com || echo "")
+      IP6=$(curl -s -6 --connect-timeout 5 https://icanhazip.com || echo "")
+
       # Read the converted output line by line
       # - `IFS=$'\t'`: Use the tab character as the field separator.
       # - `read -r key val`: For each line, split it into `key` and `val` based on the tab separator.
       while IFS=$'\t' read -r key val; do
-        # For each key-value pair, execute the curl command
-        # Replace `''${key}` and `''${val}` in the URL with the actual key and value.
-        curl -s "https://njal.la/update/?h=''${key}&k=''${val}&auto"
+        # Construct the base URL
+        URL="https://njal.la/update/?h=''${key}&k=''${val}"
+
+        # Append IPv4 if found
+        if [ -n "$IP4" ]; then
+          URL="''${URL}&a=''${IP4}"
+        fi
+
+        # Append IPv6 if found
+        if [ -n "$IP6" ]; then
+          URL="''${URL}&aaaa=''${IP6}"
+        fi
+
+        curl --connect-timeout 5 -s "$URL"
       done < <(jq -r "$jq_command" "$json_file")
     '';
   };
@@ -45,7 +59,7 @@ in {
           description = ''
             **Required options:**
 
-            - [`nixarr.ddns.njalla.keysFile`](#nixarr.ddns.njalla.keysfile)
+            - [`nixarr.ddns.njalla.vpn.keysFile`](#nixarr.ddns.njalla.keysfile)
             - [`nixarr.vpn.enable`](#nixarr.vpn.enable)
 
             Whether or not to enable DDNS over VPN for a

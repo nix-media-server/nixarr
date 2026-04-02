@@ -71,6 +71,18 @@ in {
       '';
     };
 
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.jellyfin.vpn.enable`)(#nixarr.jellyfin.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Jellyfin web ui.
+      '';
+      defaultText = literalExpression "nixarr.jellyfin.vpn.enable";
+    };
+
     expose = {
       https = {
         enable = mkOption {
@@ -225,6 +237,13 @@ in {
         '';
       }
       {
+        assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+        message = ''
+          The nixarr.jellyfin.vpn.configureNginx option requires the
+          nixarr.jellyfin.vpn.enable option to be set, but it was not.
+        '';
+      }
+      {
         assertion =
           cfg.expose.https.enable
           -> (
@@ -291,7 +310,7 @@ in {
     };
 
     services.nginx = mkMerge [
-      (mkIf (cfg.expose.https.enable || cfg.vpn.enable) {
+      (mkIf (cfg.expose.https.enable || cfg.vpn.configureNginx) {
         enable = true;
 
         recommendedTlsSettings = true;
@@ -309,8 +328,8 @@ in {
           };
         };
       })
-      (mkIf cfg.vpn.enable {
-        virtualHosts."127.0.0.1:${builtins.toString cfg.port}" = mkIf cfg.vpn.enable {
+      (mkIf cfg.vpn.configureNginx {
+        virtualHosts."127.0.0.1:${builtins.toString defaultPort}" = mkIf cfg.vpn.enable {
           listen = [
             {
               addr = nixarr.vpn.proxyListenAddr;

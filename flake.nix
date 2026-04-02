@@ -128,7 +128,7 @@
           }
           {
             title = "Github";
-            location = "https://github.com/rasmus-kirk/nixarr";
+            location = "https://github.com/nix-media-server/nixarr";
           }
         ];
         favicons = {

@@ -137,6 +137,18 @@ in {
       '';
     };
 
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.transmission.vpn.enable`)(#nixarr.transmission.vpn.enable)
+
+        Configure nginx as a reverse proxy for the transmission web ui.
+      '';
+      defaultText = literalExpression "nixarr.transmission.vpn.enable";
+    };
+
     flood.enable = mkEnableOption "the flood web-UI for the transmission web-UI.";
 
     privateTrackers = {
@@ -294,6 +306,13 @@ in {
         message = ''
           The nixarr.privateTrackers.cross-seed.enable option requires the
           nixarr.prowlarr.enable option to be set, but it was not.
+        '';
+      }
+      {
+        assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+        message = ''
+          The nixarr.transmission.vpn.configureNginx option requires the
+          nixarr.transmission.vpn.enable option to be set, but it was not.
         '';
       }
     ];
@@ -464,7 +483,7 @@ in {
       ];
     };
 
-    services.nginx = mkIf cfg.vpn.enable {
+    services.nginx = mkIf cfg.vpn.configureNginx {
       enable = true;
 
       recommendedTlsSettings = true;

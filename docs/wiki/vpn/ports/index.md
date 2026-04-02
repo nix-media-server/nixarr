@@ -29,9 +29,6 @@ Then you can set that port for a service, for example
 
 ## Debugging Ports
 
-> **Note:** See [this GH issue](https://github.com/rasmus-kirk/nixarr/issues/27)
->           first, since it's a common problem
-
 You can debug an open port using the
 [nixarr.vpn.vpnTestService](https://nixarr.com/options.html#nixarr.vpn.vpntestservice.enable):
 
