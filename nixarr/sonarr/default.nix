@@ -108,8 +108,8 @@ in {
     };
 
     systemd.tmpfiles.rules = [
-      "d '${nixarr.mediaDir}/library'        0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
-      "d '${nixarr.mediaDir}/library/shows'  0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
+      "d '${nixarr.mediaDir}/library'        2775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
+      "d '${nixarr.mediaDir}/library/shows'  2775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
     ];
 
     services.sonarr = {

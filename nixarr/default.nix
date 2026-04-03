@@ -249,7 +249,7 @@ in {
     users.groups.media.members = cfg.mediaUsers;
 
     systemd.tmpfiles.rules = [
-      "d '${cfg.mediaDir}'  0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
+      "d '${cfg.mediaDir}'  2775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
     ];
 
     environment.systemPackages = with pkgs; [

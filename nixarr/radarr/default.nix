@@ -99,8 +99,8 @@ in {
     ];
 
     systemd.tmpfiles.rules = [
-      "d '${nixarr.mediaDir}/library'        0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
-      "d '${nixarr.mediaDir}/library/movies' 0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
+      "d '${nixarr.mediaDir}/library'        2775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
+      "d '${nixarr.mediaDir}/library/movies' 2775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
     ];
 
     # Set UMask to 0002 so directories are created with group write permission (775)
