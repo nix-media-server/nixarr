@@ -103,6 +103,10 @@ in {
       "d '${nixarr.mediaDir}/library/movies' 0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
     ];
 
+    # Set UMask to 0002 so directories are created with group write permission (775)
+    # This allows other services in the media group (like Jellyfin) to modify files
+    systemd.services.radarr.serviceConfig.UMask = lib.mkForce "0002";
+
     users = {
       groups.${globals.radarr.group}.gid = globals.gids.${globals.radarr.group};
       users.${globals.radarr.user} = {
@@ -121,10 +125,6 @@ in {
       openFirewall = cfg.openFirewall;
       dataDir = cfg.stateDir;
     };
-
-    # Set UMask to 0002 so directories are created with group write permission (775)
-    # This allows other services in the media group (like Jellyfin) to modify files
-    systemd.services.radarr.serviceConfig.UMask = "0002";
 
     # Enable and specify VPN namespace to confine service in.
     systemd.services.radarr.vpnConfinement = mkIf cfg.vpn.enable {

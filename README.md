@@ -13,12 +13,18 @@ that I will remove or change options in a non-backwards-compatible way.
 
 - **Run services through a VPN:** You can run any service that this module
   supports through a VPN, fx `nixarr.transmission.vpn.enable = true;`
+- **Declarative Settings Sync:** Configure Prowlarr indexers/apps, Sonarr/Radarr
+  download clients, and Bazarr connections directly in Nix -- no manual UI
+  setup required. See the [declarative configuration example](https://nixarr.com/wiki/examples/example-3).
 - **Automatic Directories, Users and Permissions:** The module automatically
   creates directories and users for your media library. It also sets sane
   permissions.
 - **State Management:** All services support state management and all state
   that they manage is located by default in `/data/.state/nixarr/*`. This means
   that you only have to backup your media directory and `/data/.state/nixarr`.
+- **Prometheus Monitoring:** Optional Prometheus exporters for all \*Arr services,
+  qBittorrent, WireGuard, and system metrics. Enable with
+  `nixarr.exporters.enable = true`.
 - **Optional Dynamic DNS support:** If you use [Njalla](https://njal.la/)
   and don't have a static IP, you can use the `nixarr.ddns.njalla.enable`
   option to dynamically update a DNS record that points to the dynamic public

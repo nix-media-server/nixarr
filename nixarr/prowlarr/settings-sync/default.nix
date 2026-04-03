@@ -6,6 +6,7 @@
 }: let
   inherit
     (lib)
+    elem
     filter
     getExe
     literalExpression
@@ -160,11 +161,11 @@
     assertion =
       cfg.${service}.enable
       -> (config ? services.${service}.settings.auth.required)
-      && config.services.${service}.settings.auth.required == "DisabledForLocalAddresses";
+      && elem config.services.${service}.settings.auth.required ["External" "DisabledForLocalAddresses"];
     message = ''
       nixarr.prowlarr.settings-sync.apps.${service}.enable requires
       config.services.${service}.settings.auth.required to be set to
-      "DisabledForLocalAddresses", but it is not set to that value.
+      "External" or "DisabledForLocalAddresses", but it is not set to that value.
     '';
   };
 
@@ -175,11 +176,11 @@
       || cfg.apps != []
       || nixarrAppConfigs != []
       -> (config ? services.prowlarr.settings.auth.required)
-      && config.services.prowlarr.settings.auth.required == "DisabledForLocalAddresses";
+      && elem config.services.prowlarr.settings.auth.required ["External" "DisabledForLocalAddresses"];
     message = ''
       When Prowlarr is configured to sync indexers, tags, or apps, we
       require config.services.prowlarr.settings.auth.required to be set
-      to "DisabledForLocalAddresses", but it is not set to that value.
+      to "External" or "DisabledForLocalAddresses", but it is not set to that value.
     '';
   };
 

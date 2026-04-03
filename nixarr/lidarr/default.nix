@@ -122,7 +122,7 @@ in {
 
     # Set UMask to 0002 so directories are created with group write permission (775)
     # This allows other services in the media group (like Jellyfin) to modify files
-    systemd.services.lidarr.serviceConfig.UMask = "0002";
+    systemd.services.lidarr.serviceConfig.UMask = lib.mkForce "0002";
 
     # Enable and specify VPN namespace to confine service in.
     systemd.services.lidarr.vpnConfinement = mkIf cfg.vpn.enable {
