@@ -68,6 +68,9 @@
       bazarr-sync-test = pkgs.callPackage ./tests/bazarr-sync-test.nix {
         inherit (self) nixosModules;
       };
+      sma-test = pkgs.callPackage ./tests/sma-test.nix {
+        inherit (self) nixosModules;
+      };
       jellyfin-api-test = pkgs.callPackage ./tests/jellyfin-api-test.nix {
         inherit (self) nixosModules;
       };
