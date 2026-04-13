@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  sickbeard-mp4-automator-src,
   ...
 }:
 with lib; let
@@ -17,6 +18,7 @@ with lib; let
       then pkgs.ffmpeg-full
       else pkgs.ffmpeg;
     logDir = smaLogDir;
+    src = sickbeard-mp4-automator-src;
   };
 
   smaStateDir = "${nixarr.stateDir}/sma";

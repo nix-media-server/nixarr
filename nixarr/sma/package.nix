@@ -2,10 +2,10 @@
   lib,
   python3Packages,
   python3,
-  fetchFromGitHub,
   ffmpeg,
   makeWrapper,
   logDir ? "/tmp/sma",
+  src,
 }:
 let
   deps = with python3Packages; [
@@ -28,15 +28,10 @@ let
 in
   python3Packages.buildPythonApplication rec {
     pname = "sickbeard-mp4-automator";
-    version = "0-unstable-2025-04-12";
+    version = "0-unstable-${src.lastModifiedDate or "unknown"}";
     format = "other";
 
-    src = fetchFromGitHub {
-      owner = "mdhiggins";
-      repo = "sickbeard_mp4_automator";
-      rev = "e3db46613bba5724ab298b64a9214f6f6ae863b1";
-      hash = "sha256-pSCBAJ2pPfnNfQCvkC8Qy6IshK3J8oACRbFJolor3AU=";
-    };
+    inherit src;
 
     nativeBuildInputs = [makeWrapper];
 

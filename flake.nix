@@ -11,6 +11,11 @@
 
     website-builder.url = "github:rasmus-kirk/website-builder";
     website-builder.inputs.nixpkgs.follows = "nixpkgs";
+
+    sickbeard-mp4-automator = {
+      url = "github:mdhiggins/sickbeard_mp4_automator";
+      flake = false;
+    };
   };
 
   outputs = {
@@ -18,6 +23,7 @@
     treefmt-nix,
     vpnconfinement,
     website-builder,
+    sickbeard-mp4-automator,
     self,
     ...
   } @ inputs: let
@@ -44,6 +50,7 @@
     nixosModules.default.imports = [
       ./nixarr
       vpnconfinement.nixosModules.default
+      {_module.args.sickbeard-mp4-automator-src = sickbeard-mp4-automator;}
     ];
 
     # Add tests attribute to the flake outputs
