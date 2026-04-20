@@ -5,42 +5,42 @@
   ...
 }:
 with lib; let
-  cfg = config.nixarr.readarr;
+  cfg = config.nixarr.shelfmark;
   globals = config.util-nixarr.globals;
   nixarr = config.nixarr;
-  port = 8787;
+  port = 8084;
 in {
-  options.nixarr.readarr = {
+  options.nixarr.shelfmark = {
     enable = mkOption {
       type = types.bool;
       default = false;
       example = true;
       description = ''
-        Whether or not to enable the Readarr service.
+        Whether or not to enable the Shelfmark service.
       '';
     };
 
-    package = mkPackageOption pkgs "readarr" {};
+    package = mkPackageOption pkgs "shelfmark" {};
 
     port = mkOption {
       type = types.port;
       default = port;
-      description = "Port for Readarr to use.";
+      description = "Port for Shelfmark to use.";
     };
 
     stateDir = mkOption {
       type = types.path;
-      default = "${nixarr.stateDir}/readarr";
-      defaultText = literalExpression ''"''${nixarr.stateDir}/readarr"'';
-      example = "/nixarr/.state/readarr";
+      default = "${nixarr.stateDir}/shelfmark";
+      defaultText = literalExpression ''"''${nixarr.stateDir}/shelfmark"'';
+      example = "/nixarr/.state/shelfmark";
       description = ''
-        The location of the state directory for the Readarr service.
+        The location of the state directory for the Shelfmark service.
 
         > **Warning:** Setting this to any path, where the subpath is not
         > owned by root, will fail! For example:
         >
         > ```nix
-        >   stateDir = /home/user/nixarr/.state/readarr
+        >   stateDir = /home/user/nixarr/.state/shelfmark
         > ```
         >
         > Is not supported, because `/home/user` is owned by `user`.
@@ -51,7 +51,7 @@ in {
       type = types.bool;
       default = false;
       example = true;
-      description = "Open firewall for Readarr";
+      description = "Open firewall for Shelfmark.";
     };
 
     vpn.enable = mkOption {
@@ -61,7 +61,7 @@ in {
       description = ''
         **Required options:** [`nixarr.vpn.enable`](#nixarr.vpn.enable)
 
-        Route Readarr traffic through the VPN.
+        Route Shelfmark traffic through the VPN.
       '';
     };
 
@@ -70,11 +70,11 @@ in {
       default = cfg.vpn.enable;
       example = false;
       description = ''
-        **Required options:** [`nixarr.readarr.vpn.enable`)(#nixarr.readarr.vpn.enable)
+        **Required options:** [`nixarr.shelfmark.vpn.enable`](#nixarr.shelfmark.vpn.enable)
 
-        Configure nginx as a reverse proxy for the Readarr web ui.
+        Configure nginx as a reverse proxy for the Shelfmark web UI.
       '';
-      defaultText = literalExpression "nixarr.readarr.vpn.enable";
+      defaultText = literalExpression "nixarr.shelfmark.vpn.enable";
     };
   };
 
@@ -83,51 +83,56 @@ in {
       {
         assertion = cfg.vpn.enable -> nixarr.vpn.enable;
         message = ''
-          The nixarr.readarr.vpn.enable option requires the
+          The nixarr.shelfmark.vpn.enable option requires the
           nixarr.vpn.enable option to be set, but it was not.
         '';
       }
       {
         assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
         message = ''
-          The nixarr.readarr.vpn.configureNginx option requires the
-          nixarr.readarr.vpn.enable option to be set, but it was not.
+          The nixarr.shelfmark.vpn.configureNginx option requires the
+          nixarr.shelfmark.vpn.enable option to be set, but it was not.
         '';
       }
     ];
 
     users = {
-      groups.${globals.readarr.group}.gid = globals.gids.${globals.readarr.group};
-      users.${globals.readarr.user} = {
+      groups.${globals.shelfmark.group}.gid = globals.gids.${globals.shelfmark.group};
+      users.${globals.shelfmark.user} = {
         isSystemUser = true;
-        group = globals.readarr.group;
-        uid = globals.uids.${globals.readarr.user};
+        group = globals.shelfmark.group;
+        uid = globals.uids.${globals.shelfmark.user};
       };
     };
 
     systemd.tmpfiles.rules = [
-      "d '${cfg.stateDir}' 0700 ${globals.readarr.user} root - -"
+      "d '${cfg.stateDir}' 0700 ${globals.shelfmark.user} root - -"
 
-      "d '${nixarr.mediaDir}/library'       0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
-      "d '${nixarr.mediaDir}/library/books' 0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
+      "d '${nixarr.mediaDir}/library'            0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
+      "d '${nixarr.mediaDir}/library/books'      0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
+      "d '${nixarr.mediaDir}/library/audiobooks' 0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
     ];
 
-    services.readarr = {
-      enable = cfg.enable;
+    services.shelfmark = {
+      enable = true;
       package = cfg.package;
-      settings.server.port = cfg.port;
       openFirewall = cfg.openFirewall;
-      dataDir = cfg.stateDir;
-      user = globals.readarr.user;
-      group = globals.readarr.group;
+      environment = {
+        FLASK_HOST = if cfg.vpn.enable then "192.168.15.1" else "127.0.0.1";
+        FLASK_PORT = cfg.port;
+        CONFIG_DIR = cfg.stateDir;
+      };
     };
 
-    networking.firewall = mkIf cfg.openFirewall {
-      allowedTCPPorts = [cfg.port];
+    systemd.services.shelfmark.serviceConfig = {
+      DynamicUser = mkForce false;
+      User = globals.shelfmark.user;
+      Group = globals.shelfmark.group;
+      StateDirectory = mkForce "";
+      ReadWritePaths = [cfg.stateDir nixarr.mediaDir];
     };
 
-    # Enable and specify VPN namespace to confine service in.
-    systemd.services.readarr.vpnConfinement = mkIf cfg.vpn.enable {
+    systemd.services.shelfmark.vpnConfinement = mkIf cfg.vpn.enable {
       enable = true;
       vpnNamespace = "wg";
     };
@@ -140,6 +145,7 @@ in {
         }
       ];
     };
+
     services.nginx = mkIf cfg.vpn.configureNginx {
       enable = true;
 

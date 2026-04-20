@@ -27,8 +27,7 @@
     urlBase = config.services.${service}.settings.server.urlBase or "";
   in "http://127.0.0.1:${toString port}${urlBase}";
 
-  # Turns `readarr` into `Readarr` and `readarr-audiobook` into
-  # `Readarr-Audiobook`.
+  # Turns `sonarr` into `Sonarr` and `my-service` into `My-Service`.
   toKebabSentenceCase = str:
     pipe str [
       (split "-")
@@ -141,8 +140,6 @@
     "lidarr"
     "prowlarr"
     "radarr"
-    "readarr-audiobook"
-    "readarr"
     "sonarr"
     "whisparr"
   ];

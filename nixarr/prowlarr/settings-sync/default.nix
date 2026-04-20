@@ -273,11 +273,6 @@ in {
       sonarr = mkNixarrAppOptions {service = "sonarr";};
       radarr = mkNixarrAppOptions {service = "radarr";};
       lidarr = mkNixarrAppOptions {service = "lidarr";};
-      readarr = mkNixarrAppOptions {service = "readarr";};
-      readarr-audiobook = mkNixarrAppOptions {
-        service = "readarr-audiobook";
-        implementation = "Readarr";
-      };
       whisparr = mkNixarrAppOptions {service = "whisparr";};
 
       apps = mkOption {
