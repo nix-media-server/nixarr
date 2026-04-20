@@ -141,6 +141,7 @@ in {
       Group = globals.shelfmark.group;
       StateDirectory = mkForce "";
       ReadWritePaths = [cfg.stateDir nixarr.mediaDir];
+      UMask = mkForce "0002";
     };
 
     systemd.services.shelfmark.vpnConfinement = mkIf cfg.vpn.enable {
