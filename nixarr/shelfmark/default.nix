@@ -47,6 +47,17 @@ in {
       '';
     };
 
+    host = mkOption {
+      type = types.str;
+      default = "127.0.0.1";
+      example = "0.0.0.0";
+      description = ''
+        The address Shelfmark binds to. Ignored when
+        [`nixarr.shelfmark.vpn.enable`](#nixarr.shelfmark.vpn.enable) is set,
+        which forces `192.168.15.1`.
+      '';
+    };
+
     openFirewall = mkOption {
       type = types.bool;
       default = false;
@@ -118,7 +129,7 @@ in {
       package = cfg.package;
       openFirewall = cfg.openFirewall;
       environment = {
-        FLASK_HOST = if cfg.vpn.enable then "192.168.15.1" else "127.0.0.1";
+        FLASK_HOST = if cfg.vpn.enable then "192.168.15.1" else cfg.host;
         FLASK_PORT = cfg.port;
         CONFIG_DIR = cfg.stateDir;
       };
