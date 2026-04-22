@@ -161,6 +161,35 @@ in {
       }
     ];
 
+    system.activationScripts.migrate-seerr-user = {
+      deps = [];
+      text = ''
+        if ${pkgs.gnugrep}/bin/grep -q '^jellyseerr:' /etc/passwd && ! ${pkgs.gnugrep}/bin/grep -q '^seerr:' /etc/passwd; then
+          echo "nixarr: renaming jellyseerr user to seerr in /etc/passwd"
+          ${pkgs.gnused}/bin/sed -i 's/^jellyseerr:/seerr:/' /etc/passwd
+        fi
+        if ${pkgs.gnugrep}/bin/grep -q '^jellyseerr:' /etc/group && ! ${pkgs.gnugrep}/bin/grep -q '^seerr:' /etc/group; then
+          echo "nixarr: renaming jellyseerr group to seerr in /etc/group"
+          ${pkgs.gnused}/bin/sed -i 's/^jellyseerr:/seerr:/' /etc/group
+        fi
+      '';
+    };
+
+    system.activationScripts.users.deps = lib.mkAfter ["migrate-seerr-user"];
+
+    system.activationScripts.migrate-seerr-state = {
+      # Must run after user migration so the renamed seerr user owns the moved directory
+      deps = ["users"];
+      text = let
+        oldDir = "${nixarr.stateDir}/jellyseerr";
+      in ''
+        if [ -d "${oldDir}" ] && [ ! -e "${cfg.stateDir}" ]; then
+          echo "nixarr: migrating Seerr state directory from ${oldDir} to ${cfg.stateDir}"
+          mv "${oldDir}" "${cfg.stateDir}"
+        fi
+      '';
+    };
+
     systemd.tmpfiles.rules = [
       "d '${cfg.stateDir}' 0700 ${globals.seerr.user} root - -"
     ];
