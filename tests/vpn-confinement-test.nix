@@ -424,7 +424,7 @@ in
           sabnzbd.enable = false;
           autobrr.enable = false;
           recyclarr.enable = false;
-          jellyseerr.enable = false;
+          seerr.enable = false;
         };
 
         # Add IPv6 route for VPN namespace to reach internetClient via WireGuard

@@ -5,36 +5,36 @@
   ...
 }:
 with lib; let
-  cfg = config.nixarr.jellyseerr;
+  cfg = config.nixarr.seerr;
   globals = config.util-nixarr.globals;
   nixarr = config.nixarr;
   port = 5055;
 in {
-  options.nixarr.jellyseerr = {
+  options.nixarr.seerr = {
     enable = mkOption {
       type = types.bool;
       default = false;
       example = true;
       description = ''
-        Whether or not to enable the Jellyseerr service.
+        Whether or not to enable the Seerr service.
       '';
     };
 
-    package = mkPackageOption pkgs "jellyseerr" {};
+    package = mkPackageOption pkgs "seerr" {};
 
     stateDir = mkOption {
       type = types.path;
-      default = "${nixarr.stateDir}/jellyseerr";
-      defaultText = literalExpression ''"''${nixarr.stateDir}/jellyseerr"'';
-      example = "/nixarr/.state/jellyseerr";
+      default = "${nixarr.stateDir}/seerr";
+      defaultText = literalExpression ''"''${nixarr.stateDir}/seerr"'';
+      example = "/nixarr/.state/seerr";
       description = ''
-        The location of the state directory for the Jellyseerr service.
+        The location of the state directory for the Seerr service.
 
         > **Warning:** Setting this to any path, where the subpath is not
         > owned by root, will fail! For example:
         >
         > ```nix
-        >   stateDir = /home/user/nixarr/.state/jellyseerr
+        >   stateDir = /home/user/nixarr/.state/seerr
         > ```
         >
         > Is not supported, because `/home/user` is owned by `user`.
@@ -45,14 +45,14 @@ in {
       type = types.port;
       default = port;
       example = 12345;
-      description = "Jellyseerr web-UI port.";
+      description = "Seerr web-UI port.";
     };
 
     openFirewall = mkOption {
       type = types.bool;
       default = false;
       example = true;
-      description = "Open firewall for Jellyseerr";
+      description = "Open firewall for Seerr";
     };
 
     vpn.enable = mkOption {
@@ -62,9 +62,9 @@ in {
       description = ''
         **Required options:** [`nixarr.vpn.enable`](#nixarr.vpn.enable)
 
-        **Conflicting options:** [`nixarr.jellyseerr.expose.https.enable`](#nixarr.jellyseerr.expose.https.enable)
+        **Conflicting options:** [`nixarr.seerr.expose.https.enable`](#nixarr.seerr.expose.https.enable)
 
-        Route Jellyseerr traffic through the VPN.
+        Route Seerr traffic through the VPN.
       '';
     };
 
@@ -73,11 +73,11 @@ in {
       default = cfg.vpn.enable;
       example = false;
       description = ''
-        **Required options:** [`nixarr.jellyseerr.vpn.enable`)(#nixarr.jellyseerr.vpn.enable)
+        **Required options:** [`nixarr.seerr.vpn.enable`](#nixarr.seerr.vpn.enable)
 
-        Configure nginx as a reverse proxy for the Jellyseerr web ui.
+        Configure nginx as a reverse proxy for the Seerr web ui.
       '';
-      defaultText = literalExpression "nixarr.jellyseerr.vpn.enable";
+      defaultText = literalExpression "nixarr.seerr.vpn.enable";
     };
 
     expose = {
@@ -89,15 +89,15 @@ in {
           description = ''
             **Required options:**
 
-            - [`nixarr.jellyseerr.expose.https.acmeMail`](#nixarr.jellyseerr.expose.https.acmemail)
-            - [`nixarr.jellyseerr.expose.https.domainName`](#nixarr.jellyseerr.expose.https.domainname)
+            - [`nixarr.seerr.expose.https.acmeMail`](#nixarr.seerr.expose.https.acmemail)
+            - [`nixarr.seerr.expose.https.domainName`](#nixarr.seerr.expose.https.domainname)
 
-            **Conflicting options:** [`nixarr.jellyseerr.vpn.enable`](#nixarr.jellyseerr.vpn.enable)
+            **Conflicting options:** [`nixarr.seerr.vpn.enable`](#nixarr.seerr.vpn.enable)
 
-            Expose the Jellyseerr web service to the internet with https support,
+            Expose the Seerr web service to the internet with https support,
             allowing anyone to access it.
 
-            > **Warning:** Do _not_ enable this without setting up Jellyseerr
+            > **Warning:** Do _not_ enable this without setting up Seerr
             > authentication through localhost first!
           '';
         };
@@ -107,8 +107,8 @@ in {
         domainName = mkOption {
           type = types.nullOr types.str;
           default = null;
-          example = "jellyseerr.example.com";
-          description = "The domain name to host Jellyseerr on.";
+          example = "seerr.example.com";
+          description = "The domain name to host Seerr on.";
         };
 
         acmeMail = mkOption {
@@ -126,22 +126,22 @@ in {
       {
         assertion = cfg.vpn.enable -> nixarr.vpn.enable;
         message = ''
-          The nixarr.jellyseerr.vpn.enable option requires the
+          The nixarr.seerr.vpn.enable option requires the
           nixarr.vpn.enable option to be set, but it was not.
         '';
       }
       {
         assertion = !(cfg.vpn.enable && cfg.expose.https.enable);
         message = ''
-          The nixarr.jellyseerr.vpn.enable option conflicts with the
-          nixarr.jellyseerr.expose.https.enable option. You cannot set both.
+          The nixarr.seerr.vpn.enable option conflicts with the
+          nixarr.seerr.expose.https.enable option. You cannot set both.
         '';
       }
       {
         assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
         message = ''
-          The nixarr.jellyseerr.vpn.configureNginx option requires the
-          nixarr.jellyseerr.vpn.enable option to be set, but it was not.
+          The nixarr.seerr.vpn.configureNginx option requires the
+          nixarr.seerr.vpn.enable option to be set, but it was not.
         '';
       }
       {
@@ -152,21 +152,21 @@ in {
             && (cfg.expose.https.acmeMail != null)
           );
         message = ''
-          The nixarr.jellyseerr.expose.https.enable option requires the
+          The nixarr.seerr.expose.https.enable option requires the
           following options to be set, but one of them were not:
 
-          - nixarr.jellyseerr.expose.https.domainName
-          - nixarr.jellyseerr.expose.https.acmeMail
+          - nixarr.seerr.expose.https.domainName
+          - nixarr.seerr.expose.https.acmeMail
         '';
       }
     ];
 
     systemd.tmpfiles.rules = [
-      "d '${cfg.stateDir}' 0700 ${globals.jellyseerr.user} root - -"
+      "d '${cfg.stateDir}' 0700 ${globals.seerr.user} root - -"
     ];
 
-    systemd.services.jellyseerr = {
-      description = "Jellyseerr, a requests manager for Jellyfin";
+    systemd.services.seerr = {
+      description = "Open-source media request and discovery manager for Jellyfin, Plex, and Emby";
       after = ["network.target"];
       wantedBy = ["multi-user.target"];
       environment = {
@@ -176,10 +176,10 @@ in {
 
       serviceConfig = {
         Type = "exec";
-        StateDirectory = "jellyseerr";
+        StateDirectory = "seerr";
         DynamicUser = false;
-        User = globals.jellyseerr.user;
-        Group = globals.jellyseerr.group;
+        User = globals.seerr.user;
+        Group = globals.seerr.group;
         ExecStart = lib.getExe cfg.package;
         Restart = "on-failure";
 
@@ -204,11 +204,11 @@ in {
     };
 
     users = {
-      groups.${globals.jellyseerr.group}.gid = globals.gids.${globals.jellyseerr.group};
-      users.${globals.jellyseerr.user} = {
+      groups.${globals.seerr.group}.gid = globals.gids.${globals.seerr.group};
+      users.${globals.seerr.user} = {
         isSystemUser = true;
-        group = globals.jellyseerr.group;
-        uid = globals.uids.${globals.jellyseerr.user};
+        group = globals.seerr.group;
+        uid = globals.uids.${globals.seerr.user};
       };
     };
 
@@ -268,7 +268,7 @@ in {
     };
 
     # Enable and specify VPN namespace to confine service in.
-    systemd.services.jellyseerr.vpnConfinement = mkIf cfg.vpn.enable {
+    systemd.services.seerr.vpnConfinement = mkIf cfg.vpn.enable {
       enable = true;
       vpnNamespace = "wg";
     };

@@ -49,6 +49,6 @@ This example does the following:
     radarr.enable = true;
     readarr.enable = true;
     sonarr.enable = true;
-    jellyseerr.enable = true;
+    seerr.enable = true;
   };
 ```

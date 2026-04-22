@@ -32,13 +32,13 @@ pkgs.testers.nixosTest {
       };
     };
 
-    # Mock jellyseerr API key extraction since we don't want to run full jellyseerr
-    systemd.services.jellyseerr-api-key = {
-      serviceConfig.ExecStart = lib.mkForce (pkgs.writeShellScript "mock-jellyseerr-api-key" ''
-        mkdir -p /data/.state/nixarr/api-keys
-        echo "mock-jellyseerr-key" > /data/.state/nixarr/api-keys/jellyseerr.key
-        chown root:jellyseerr-api /data/.state/nixarr/api-keys/jellyseerr.key
-        chmod 640 /data/.state/nixarr/api-keys/jellyseerr.key
+    # Mock seerr API key extraction since we don't want to run full seerr
+    systemd.services.seerr-api = {
+      serviceConfig.ExecStart = lib.mkForce (pkgs.writeShellScript "mock-seerr-api-key" ''
+        mkdir -p /data/.state/nixarr/secrets
+        echo "mock-jellyseerr-key" > /data/.state/nixarr/secrets/seerr.api-key
+        chown root:seerr-api /data/.state/nixarr/secrets/seerr.api-key
+        chmod 640 /data/.state/nixarr/secrets/seerr.api-key
       '');
     };
   };

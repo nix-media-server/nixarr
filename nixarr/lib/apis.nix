@@ -26,7 +26,7 @@
   serviceCfgFile =
     {
       bazarr = "${cfg.bazarr.stateDir}/config/config.yaml";
-      jellyseerr = "${cfg.jellyseerr.stateDir}/settings.json";
+      seerr = "${cfg.seerr.stateDir}/settings.json";
       sabnzbd = "${cfg.sabnzbd.stateDir}/sabnzbd.ini";
       transmission = "${cfg.transmission.stateDir}/.config/transmission-daemon/settings.json";
     }
@@ -42,8 +42,8 @@
       bazarr = pkgs.writeShellScript "print-bazarr-api-key" ''
         ${yq} -r .auth.apikey '${serviceCfgFile.bazarr}'
       '';
-      jellyseerr = pkgs.writeShellScript "print-jellyseerr-api-key" ''
-        ${yq} -r .main.apiKey '${serviceCfgFile.jellyseerr}'
+      seerr = pkgs.writeShellScript "print-seerr-api-key" ''
+        ${yq} -r .main.apiKey '${serviceCfgFile.seerr}'
       '';
       sabnzbd = pkgs.writeShellScript "print-sabnzbd-api-key" ''
         ${grep} api_key '${serviceCfgFile.sabnzbd}' | ${sed} 's/^api_key.*= *//g'
