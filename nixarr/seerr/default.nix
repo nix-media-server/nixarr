@@ -20,7 +20,11 @@ in {
       '';
     };
 
-    package = mkPackageOption pkgs "seerr" {};
+    package = mkPackageOption pkgs (
+      if lib.versionAtLeast lib.version "26.05pre"
+      then "seerr"
+      else "jellyseerr"
+    ) {};
 
     stateDir = mkOption {
       type = types.path;
