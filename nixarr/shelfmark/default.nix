@@ -129,7 +129,10 @@ in {
       package = cfg.package;
       openFirewall = cfg.openFirewall;
       environment = {
-        FLASK_HOST = if cfg.vpn.enable then "192.168.15.1" else cfg.host;
+        FLASK_HOST =
+          if cfg.vpn.enable
+          then "192.168.15.1"
+          else cfg.host;
         FLASK_PORT = cfg.port;
         CONFIG_DIR = cfg.stateDir;
       };
