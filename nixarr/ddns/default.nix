@@ -45,8 +45,10 @@ with lib; let
         fi
 
         curl --connect-timeout 5 -s "$URL"
+        sleep 3
       done < <(jq -r "$jq_command" "$json_file")
     '';
+  };
   ddns-1984 = pkgs.writeShellApplication {
     name = "ddns-1984";
 
@@ -68,9 +70,10 @@ with lib; let
       # - `read -r key val`: For each line, split it into `key` and `val` based on the tab separator.
       while IFS=$'\t' read -r key val; do
         # Construct the base URL
-        URL="https://api.1984.is/1.0/freedns/?apikey=''${val}&domain=''${key}&ip="""
+        URL="https://api.1984.is/1.0/freedns/?apikey=''${val}&domain=''${key}&ip="
 
         curl --connect-timeout 5 -s "$URL"
+        sleep 3
       done < <(jq -r "$jq_command" "$json_file")
     '';
   };
@@ -92,7 +95,7 @@ in {
       };
 
       keysFile = mkOption {
-        type = with types; nullOr path;
+        type = with types; nullOr str;
         default = null;
         example = "/data/.secret/njalla/keys-file.json";
         description = ''
@@ -133,7 +136,7 @@ in {
       };
 
       keysFile = mkOption {
-        type = with types; nullOr path;
+        type = with types; nullOr str;
         default = null;
         example = "/data/.secret/1984/keys-file.json";
         description = ''
@@ -192,8 +195,8 @@ in {
         };
       })
       (mkIf cfg.nineteenEightyFour.enable {
-        ddnsNjallaVpn = {
-          description = "Timer for setting the 1984 DDNS records over VPN";
+        ddns1984 = {
+          description = "Timer for setting the 1984 DDNS records";
           timerConfig = {
             OnBootSec = "30"; # Run 30 seconds after system boot
             OnCalendar = "hourly";
@@ -216,9 +219,9 @@ in {
           };
         };
       })
-      (mkIf cfg.nineteenEightyFour.vpn.enable {
-        ddnsNjallaVpn = {
-          description = "Sets the 1984 DDNS records over VPN";
+      (mkIf cfg.nineteenEightyFour.enable {
+        ddns1984 = {
+          description = "Sets the 1984 DDNS records";
           serviceConfig = {
             ExecStart = ''${getExe ddns-1984} "${cfg.nineteenEightyFour.keysFile}"'';
             Type = "oneshot";
