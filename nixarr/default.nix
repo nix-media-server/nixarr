@@ -24,8 +24,7 @@ in {
     ./prowlarr
     ./qbittorrent
     ./radarr
-    ./readarr
-    ./readarr-audiobook
+    ./shelfmark
     ./recyclarr
     ./sabnzbd
     ./sonarr
@@ -71,8 +70,7 @@ in {
         - [Prowlarr](#nixarr.prowlarr.enable)
         - [qBittorrent](#nixarr.qbittorrent.enable)
         - [Radarr](#nixarr.radarr.enable)
-        - [Readarr](#nixarr.readarr.enable)
-        - [Readarr Audiobook](#nixarr.readarr-audiobook.enable)
+        - [Shelfmark](#nixarr.shelfmark.enable)
         - [Recyclarr](#nixarr.recyclarr.enable)
         - [SABnzbd](#nixarr.sabnzbd.enable)
         - [Sonarr](#nixarr.sonarr.enable)

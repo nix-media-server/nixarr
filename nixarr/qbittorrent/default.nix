@@ -306,7 +306,7 @@ in {
         "d '${nixarr.mediaDir}/qbittorrent/lidarr'      0775 ${globals.qbittorrent.user} ${globals.qbittorrent.group} - -"
         "d '${nixarr.mediaDir}/qbittorrent/radarr'      0775 ${globals.qbittorrent.user} ${globals.qbittorrent.group} - -"
         "d '${nixarr.mediaDir}/qbittorrent/sonarr'      0775 ${globals.qbittorrent.user} ${globals.qbittorrent.group} - -"
-        "d '${nixarr.mediaDir}/qbittorrent/readarr'     0775 ${globals.qbittorrent.user} ${globals.qbittorrent.group} - -"
+        "d '${nixarr.mediaDir}/qbittorrent/shelfmark'   0775 ${globals.qbittorrent.user} ${globals.qbittorrent.group} - -"
       ];
 
     # Use NixOS qbittorrent service

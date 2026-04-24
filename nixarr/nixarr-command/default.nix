@@ -136,13 +136,9 @@ with lib; let
         chown -R ${globals.bazarr.user}:root "${nixarr.bazarr.stateDir}"
         find "${nixarr.bazarr.stateDir}" \( -type d -exec chmod 0700 {} + -true \) -o \( -exec chmod 0600 {} + \)
       ''}
-        ${strings.optionalString nixarr.readarr.enable ''
-        chown -R ${globals.readarr.user}:root "${nixarr.readarr.stateDir}"
-        find "${nixarr.readarr.stateDir}" \( -type d -exec chmod 0700 {} + -true \) -o \( -exec chmod 0600 {} + \)
-      ''}
-        ${strings.optionalString nixarr.readarr-audiobook.enable ''
-        chown -R ${globals.readarr-audiobook.user}:root "${nixarr.readarr-audiobook.stateDir}"
-        find "${nixarr.readarr-audiobook.stateDir}" \( -type d -exec chmod 0700 {} + -true \) -o \( -exec chmod 0600 {} + \)
+        ${strings.optionalString nixarr.shelfmark.enable ''
+        chown -R ${globals.shelfmark.user}:root "${nixarr.shelfmark.stateDir}"
+        find "${nixarr.shelfmark.stateDir}" \( -type d -exec chmod 0700 {} + -true \) -o \( -exec chmod 0600 {} + \)
       ''}
         ${strings.optionalString nixarr.jellyseerr.enable ''
         chown -R ${globals.jellyseerr.user}:root "${nixarr.jellyseerr.stateDir}"
@@ -199,14 +195,6 @@ with lib; let
         RADARR=$(xq '.Config.ApiKey' "${nixarr.radarr.stateDir}/config.xml")
         echo "Radarr api-key: $RADARR"
       ''}
-        ${strings.optionalString nixarr.readarr.enable ''
-        READARR=$(xq '.Config.ApiKey' "${nixarr.readarr.stateDir}/config.xml")
-        echo "Readarr api-key: $READARR"
-      ''}
-        ${strings.optionalString nixarr.readarr-audiobook.enable ''
-        READARR_AUDIOBOOK=$(xq -r '.Config.ApiKey' "${nixarr.readarr-audiobook.stateDir}/config.xml")
-        echo "Readarr Audiobook api-key: $READARR_AUDIOBOOK"
-      ''}
         ${strings.optionalString nixarr.sabnzbd.enable ''
         SABNZBD=$(grep api_key ${nixarr.sabnzbd.stateDir}/sabnzbd.ini | sed 's/^api_key.*= *//g')
         echo "Sabnzbd api-key: \"$SABNZBD\""
@@ -241,7 +229,7 @@ with lib; let
 
         echo "Wiping all nixarr users and groups from /etc/passwd and /etc/group..."
 
-        sed -i -E '/^(audiobookshelf|autobrr|bazarr|cross-seed|jellyfin|jellyseerr|lidarr|plex|prowlarr|qbittorrent|radarr|readarr|recyclarr|sabnzbd|sonarr|streamer|torrenter|transmission|usenet|whisparr|komgarr)/d' /etc/passwd
+        sed -i -E '/^(audiobookshelf|autobrr|bazarr|cross-seed|jellyfin|jellyseerr|lidarr|plex|prowlarr|qbittorrent|radarr|readarr|recyclarr|sabnzbd|shelfmark|sonarr|streamer|torrenter|transmission|usenet|whisparr|komgarr)/d' /etc/passwd
         sed -i -E '/^(autobrr|cross-seed|jellyseerr|media|prowlarr|recyclarr|sabnzbd|streamer|torrenter|transmission|usenet)/d' /etc/group
 
         echo ""

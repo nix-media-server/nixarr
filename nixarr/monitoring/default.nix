@@ -116,29 +116,6 @@ in {
           '';
         };
       };
-      readarr.exporter = {
-        enable = mkOption {
-          type = types.bool;
-          default = true;
-          description = ''
-            Whether to enable the Readarr Prometheus exporter.
-            Only has an effect if nixarr.exporters.enable and nixarr.readarr.enable are true.
-          '';
-        };
-        port = mkOption {
-          type = types.port;
-          default = 9710;
-          description = "Port for Readarr metrics";
-        };
-        listenAddr = mkOption {
-          type = types.str;
-          default = "0.0.0.0";
-          description = ''
-            Address for Readarr exporter to listen on.
-            Note: This is forced to "0.0.0.0" if the service is VPN-confined.
-          '';
-        };
-      };
       prowlarr.exporter = {
         enable = mkOption {
           type = types.bool;
@@ -203,17 +180,6 @@ in {
             else cfg.lidarr.exporter.listenAddr;
         };
 
-        exportarr-readarr = mkIf (shouldEnableExporter "readarr") {
-          enable = true;
-          url = "http://127.0.0.1:8787";
-          apiKeyFile = "${cfg.stateDir}/secrets/readarr.api-key";
-          port = cfg.readarr.exporter.port;
-          listenAddress =
-            if isVpnConfined "readarr"
-            then "0.0.0.0"
-            else cfg.readarr.exporter.listenAddr;
-        };
-
         exportarr-prowlarr = mkIf (shouldEnableExporter "prowlarr") {
           enable = true;
           url = "http://127.0.0.1:9696";
@@ -269,7 +235,6 @@ in {
             (makeVpnExporterService "sonarr")
             (makeVpnExporterService "radarr")
             (makeVpnExporterService "lidarr")
-            (makeVpnExporterService "readarr")
             (makeVpnExporterService "prowlarr")
             {
               # Add wireguard exporter to the VPN namespace so that it can access wireguard
@@ -303,11 +268,6 @@ in {
           requires = ["lidarr-api.service"];
           serviceConfig.SupplementaryGroups = ["lidarr-api"];
         };
-        "prometheus-exportarr-readarr-exporter" = mkIf (shouldEnableExporter "readarr" && !isVpnConfined "readarr") {
-          after = ["readarr-api.service"];
-          requires = ["readarr-api.service"];
-          serviceConfig.SupplementaryGroups = ["readarr-api"];
-        };
         "prometheus-exportarr-prowlarr-exporter" = mkIf (shouldEnableExporter "prowlarr" && !isVpnConfined "prowlarr") {
           after = ["prowlarr-api.service"];
           requires = ["prowlarr-api.service"];
@@ -331,10 +291,6 @@ in {
           from = cfg.lidarr.exporter.port;
           to = cfg.lidarr.exporter.port;
         })
-        ++ (optional (shouldEnableExporter "readarr" && isVpnConfined "readarr") {
-          from = cfg.readarr.exporter.port;
-          to = cfg.readarr.exporter.port;
-        })
         ++ (optional (shouldEnableExporter "prowlarr" && isVpnConfined "prowlarr") {
           from = cfg.prowlarr.exporter.port;
           to = cfg.prowlarr.exporter.port;
@@ -350,7 +306,6 @@ in {
       (optional (shouldEnableExporter "sonarr" && !isVpnConfined "sonarr") cfg.sonarr.exporter.port)
       ++ (optional (shouldEnableExporter "radarr" && !isVpnConfined "radarr") cfg.radarr.exporter.port)
       ++ (optional (shouldEnableExporter "lidarr" && !isVpnConfined "lidarr") cfg.lidarr.exporter.port)
-      ++ (optional (shouldEnableExporter "readarr" && !isVpnConfined "readarr") cfg.readarr.exporter.port)
       ++ (optional (shouldEnableExporter "prowlarr" && !isVpnConfined "prowlarr") cfg.prowlarr.exporter.port)
       ++ (optional shouldEnableWireguardExporter cfg.wireguard.exporter.port)
     );

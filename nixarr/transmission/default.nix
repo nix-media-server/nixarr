@@ -340,7 +340,7 @@ in {
       "d '${nixarr.mediaDir}/torrents/lidarr'      0755 ${globals.transmission.user} ${globals.transmission.group} - -"
       "d '${nixarr.mediaDir}/torrents/radarr'      0755 ${globals.transmission.user} ${globals.transmission.group} - -"
       "d '${nixarr.mediaDir}/torrents/sonarr'      0755 ${globals.transmission.user} ${globals.transmission.group} - -"
-      "d '${nixarr.mediaDir}/torrents/readarr'     0755 ${globals.transmission.user} ${globals.transmission.group} - -"
+      "d '${nixarr.mediaDir}/torrents/shelfmark'   0755 ${globals.transmission.user} ${globals.transmission.group} - -"
     ];
 
     util-nixarr.services.cross-seed = mkIf cfg-cross-seed.enable {

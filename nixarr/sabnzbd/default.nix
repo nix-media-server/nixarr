@@ -192,7 +192,7 @@ in {
         {
           assertion = cfg.vpn.enable -> nixarr.vpn.enable;
           message = ''
-            The nixarr.readarr.vpn.enable option requires the
+            The nixarr.sabnzbd.vpn.enable option requires the
             nixarr.vpn.enable option to be set, but it was not.
           '';
         }
@@ -226,7 +226,7 @@ in {
         "d '${nixarr.mediaDir}/usenet/lidarr'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
         "d '${nixarr.mediaDir}/usenet/radarr'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
         "d '${nixarr.mediaDir}/usenet/sonarr'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/readarr'     0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
+        "d '${nixarr.mediaDir}/usenet/shelfmark'   0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
       ];
 
       services.sabnzbd = {
