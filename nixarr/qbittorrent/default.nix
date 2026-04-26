@@ -117,30 +117,32 @@ in {
       webuiPort = cfg.uiPort;
       torrentingPort = cfg.peerPort;
       openFirewall = cfg.openFirewall;
-      serverConfig = {
-        LegalNotice.Accepted = true;
-        BitTorrent.Session = {
-          DefaultSavePath = downloadDir;
-          TempPath = "${downloadDir}/.incomplete";
-          TempPathEnabled = true;
-          Port = cfg.peerPort;
-          "BTProtocol" = "TCP";
-        };
-        Preferences = {
-          WebUI = {
-            Address =
-              if cfg.vpn.enable
-              then "192.168.15.1"
-              else "0.0.0.0";
-            Port = cfg.uiPort;
-          };
-          Downloads = {
-            SavePath = downloadDir;
+      serverConfig =
+        {
+          LegalNotice.Accepted = true;
+          BitTorrent.Session = {
+            DefaultSavePath = downloadDir;
             TempPath = "${downloadDir}/.incomplete";
             TempPathEnabled = true;
+            Port = cfg.peerPort;
+            "BTProtocol" = "TCP";
           };
-        };
-      } // cfg.extraSettings;
+          Preferences = {
+            WebUI = {
+              Address =
+                if cfg.vpn.enable
+                then "192.168.15.1"
+                else "0.0.0.0";
+              Port = cfg.uiPort;
+            };
+            Downloads = {
+              SavePath = downloadDir;
+              TempPath = "${downloadDir}/.incomplete";
+              TempPathEnabled = true;
+            };
+          };
+        }
+        // cfg.extraSettings;
     };
 
     users.users.qbittorrent = {
