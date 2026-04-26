@@ -53,6 +53,9 @@
         simple-test = pkgs.callPackage ./tests/simple-test.nix {
           inherit (self) nixosModules;
         };
+        anchorr-test = pkgs.callPackage ./tests/anchorr-test.nix {
+          inherit (self) nixosModules;
+        };
         # vpn-confinement-test = pkgs.callPackage ./tests/vpn-confinement-test.nix {
         #   inherit (self) nixosModules;
         # };

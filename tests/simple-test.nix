@@ -15,6 +15,9 @@ pkgs.testers.nixosTest {
 
     networking.firewall.enable = false;
 
+    virtualisation.memorySize = 4096;
+    virtualisation.diskSize = 8192;
+
     nixarr = {
       enable = true;
 
@@ -39,6 +42,7 @@ pkgs.testers.nixosTest {
       prowlarr.enable = true;
       whisparr.enable = true;
       komga.enable = true;
+      anchorr.enable = true;
 
       # recyclarr = {
       #   enable = true;
@@ -112,6 +116,7 @@ pkgs.testers.nixosTest {
     machine.succeed("systemctl is-active sabnzbd")
     machine.succeed("systemctl is-active lidarr")
     machine.succeed("systemctl is-active prowlarr")
+    machine.succeed("systemctl is-active anchorr")
     # machine.succeed("systemctl is-active recyclarr")
 
     print("\n=== Nixarr Simple Test Completed ===")

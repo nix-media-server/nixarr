@@ -9,6 +9,7 @@ with lib; let
   globals = config.util-nixarr.globals;
 in {
   imports = [
+    ./anchorr
     ./audiobookshelf
     ./autobrr
     ./bazarr
@@ -59,6 +60,7 @@ in {
 
         The following services are supported:
 
+        - [Anchorr](#nixarr.anchorr.enable)
         - [Audiobookshelf](#nixarr.audiobookshelf.enable)
         - [Autobrr](#nixarr.autobrr.enable)
         - [Bazarr](#nixarr.bazarr.enable)

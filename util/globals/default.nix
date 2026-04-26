@@ -23,6 +23,7 @@ in {
       plex = 193;
       jellyfin = 146;
       audiobookshelf = 156;
+      anchorr = 185;
       autobrr = 188;
       bazarr = 232;
       lidarr = 306;
@@ -42,6 +43,7 @@ in {
       stash = 69;
     };
     gids = {
+      anchorr = 185;
       autobrr = 188;
       # Removed 2025-10-29
       # cross-seed = 183;
@@ -55,6 +57,10 @@ in {
     audiobookshelf = {
       user = "audiobookshelf";
       group = globals.libraryOwner.group;
+    };
+    anchorr = {
+      user = "anchorr";
+      group = "anchorr";
     };
     autobrr = {
       user = "autobrr";
