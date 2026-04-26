@@ -12,7 +12,8 @@ that I will remove or change options in a non-backwards-compatible way.
 ## Features
 
 - **Run services through a VPN:** You can run any service that this module
-  supports through a VPN, fx `nixarr.transmission.vpn.enable = true;`
+  supports through a VPN, fx `nixarr.transmission.vpn.enable = true;` or
+  `nixarr.qbittorrent.vpn.enable = true;`
 - **Automatic Directories, Users and Permissions:** The module automatically
   creates directories and users for your media library. It also sets sane
   permissions.

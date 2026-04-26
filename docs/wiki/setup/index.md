@@ -39,6 +39,34 @@ already set. See the following links for more info:
 - [The `nixarr.transmission` options](https://nixarr.com/nixos-options/#nixarr.transmission.enable)
 - [Settings that can be passed through `nixarr.transmission.settings`]
 
+## qBittorrent
+
+- Open your browser and go to `{URL}:8080`.
+- On first launch, qBittorrent generates a temporary admin password shown in the
+  systemd journal. Retrieve it with:
+  ```
+  sudo journalctl -u qbittorrent -b | grep password
+  ```
+- Log in with username `admin` and the temporary password.
+- Go to "Tools" > "Options" > "Web UI":
+  - Change the default password to something secure.
+
+**Configuring download categories for the \*Arrs:**
+
+Each \*Arr service needs its own category in qBittorrent so downloads are
+sorted into the correct directories:
+
+1. Right-click in the category panel on the left sidebar.
+2. Click "Add category".
+3. Add the following categories with their save paths:
+   - `radarr` → `/data/media/torrents/radarr`
+   - `sonarr` → `/data/media/torrents/sonarr`
+   - `lidarr` → `/data/media/torrents/lidarr`
+   - `readarr` → `/data/media/torrents/readarr`
+
+When adding qBittorrent as a download client in each \*Arr, set the category
+to the corresponding name.
+
 ## Radarr
 
 - Open your browser and go to `{URL}:7878`.
@@ -51,8 +79,9 @@ already set. See the following links for more info:
   - Under `Permissions`, change `chmod Folder` to `775`
   - Under `Root Folders`, click `Add Root Folder`. Add
   `/data/media/library/movies/`, then click `Save Changes`.
-- Go to "Settings" > "Download Clients" and add Transmission. Change the
-  category to `radarr`.
+- Go to "Settings" > "Download Clients" and add your torrent client:
+  - **Transmission**: select Transmission, set the category to `radarr`.
+  - **qBittorrent**: select qBittorrent, set the category to `radarr`.
 
 **Recommendations:**:
 
@@ -71,8 +100,9 @@ already set. See the following links for more info:
   - Under `Permissions`, change `chmod Folder` to `775`
   - Under `Root Folders`, click `Add Root Folder`. Add
   `/data/media/library/shows/`, then click `Save Changes`.
-- Go to "Settings" > "Download Clients" and add Transmission. Change the
-  category to `sonarr`.
+- Go to "Settings" > "Download Clients" and add your torrent client:
+  - **Transmission**: select Transmission, set the category to `sonarr`.
+  - **qBittorrent**: select qBittorrent, set the category to `sonarr`.
 
 **Recommendations:**:
 

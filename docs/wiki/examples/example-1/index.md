@@ -5,7 +5,7 @@ title: Basic Example
 This example does the following:
 
 - Runs a jellyfin server and exposes it to the internet with HTTPS support.
-- Runs the transmission torrent client through a vpn
+- Runs a torrent client (Transmission or qBittorrent) through a VPN
 - Runs all "*Arrs" supported by this module
 
 ```nix {.numberLines}
@@ -51,4 +51,14 @@ This example does the following:
     sonarr.enable = true;
     jellyseerr.enable = true;
   };
+```
+
+To use qBittorrent instead of Transmission, replace the `transmission` block with:
+
+```nix {.numberLines}
+    qbittorrent = {
+      enable = true;
+      vpn.enable = true;
+      peerPort = 50000; # Set this to the port forwarded by your VPN
+    };
 ```

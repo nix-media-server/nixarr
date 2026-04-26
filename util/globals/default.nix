@@ -35,6 +35,7 @@ in {
       readarr-audiobook = 211;
       recyclarr = 269;
       sabnzbd = 38;
+      qbittorrent = 71;
       transmission = 70;
       # Removed 2025-10-29
       # cross-seed = 183;
@@ -110,6 +111,10 @@ in {
     };
     sonarr = {
       user = "sonarr";
+      group = globals.libraryOwner.group;
+    };
+    qbittorrent = {
+      user = "qbittorrent";
       group = globals.libraryOwner.group;
     };
     transmission = {

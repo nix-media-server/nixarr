@@ -22,6 +22,7 @@ in {
     ./openssh
     ./plex
     ./prowlarr
+    ./qbittorrent
     ./radarr
     ./readarr
     ./readarr-audiobook
@@ -74,6 +75,7 @@ in {
         - [SABnzbd](#nixarr.sabnzbd.enable)
         - [Sonarr](#nixarr.sonarr.enable)
         - [Transmission](#nixarr.transmission.enable)
+        - [qBittorrent](#nixarr.qbittorrent.enable)
 
         Remember to read the options!
       '';
