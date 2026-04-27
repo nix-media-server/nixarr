@@ -153,6 +153,7 @@ in {
 
     systemd.services.qbittorrent = {
       serviceConfig.IOSchedulingPriority = 7;
+      serviceConfig.UMask = "0002";
 
       vpnConfinement = mkIf cfg.vpn.enable {
         enable = true;
