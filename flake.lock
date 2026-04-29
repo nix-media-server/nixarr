@@ -19,9 +19,26 @@
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
+        "sickbeard-mp4-automator": "sickbeard-mp4-automator",
         "treefmt-nix": "treefmt-nix",
         "vpnconfinement": "vpnconfinement",
         "website-builder": "website-builder"
+      }
+    },
+    "sickbeard-mp4-automator": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1771841168,
+        "narHash": "sha256-pSCBAJ2pPfnNfQCvkC8Qy6IshK3J8oACRbFJolor3AU=",
+        "owner": "mdhiggins",
+        "repo": "sickbeard_mp4_automator",
+        "rev": "e3db46613bba5724ab298b64a9214f6f6ae863b1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mdhiggins",
+        "repo": "sickbeard_mp4_automator",
+        "type": "github"
       }
     },
     "treefmt-nix": {

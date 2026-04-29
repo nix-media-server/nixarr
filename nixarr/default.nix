@@ -30,6 +30,7 @@ in {
     ./sonarr
     ./transmission
     ./whisparr
+    ./sma
     ./monitoring
     ../util
   ];
@@ -75,6 +76,7 @@ in {
         - [SABnzbd](#nixarr.sabnzbd.enable)
         - [Sonarr](#nixarr.sonarr.enable)
         - [Transmission](#nixarr.transmission.enable)
+        - [SMA](#nixarr.sma.enable) (Sickbeard MP4 Automator)
 
         Remember to read the options!
       '';
