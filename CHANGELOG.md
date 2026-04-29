@@ -18,6 +18,7 @@ Added:
     `nixarr.bazarr.settings-sync.sonarr.enable = true` and
     `nixarr.bazarr.settings-sync.radarr.enable = true` with optional filtering
     for monitored content only.
+- **1984 DDNS** options.
 - **qBittorrent service** with VPN confinement support, [qui](https://github.com/autobrr/qui)
   WebUI (enabled by default), private tracker mode, Prometheus exporter, and
   `extraConfig` for declarative configuration.
@@ -42,6 +43,7 @@ Added:
   Caddy or Tailscale to front services.
 - **Audiobookshelf:** exposed `host` option for configuring listen address,
   fixed `openFirewall` to actually open ports.
+- Shelfmark service
 
 Changed:
 - Formatting now uses `treefmt-nix` with `alejandra` (Nix) and `ruff-format`
@@ -59,6 +61,9 @@ Fixed:
 - qBittorrent `fix-permissions` now uses the correct download path.
 - Jellyfin authentication cleaned up: uses shared API key instead of creating
   a new device UUID per connection.
+
+Removed:
+- Readarr and Readarr-audiobook, use shelfmark
 
 ## 2025-11-15
 
