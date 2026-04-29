@@ -97,6 +97,10 @@ with lib; let
         chown -R ${globals.audiobookshelf.user}:root "${nixarr.audiobookshelf.stateDir}"
         find "${nixarr.audiobookshelf.stateDir}" \( -type d -exec chmod 0700 {} + -true \) -o \( -exec chmod 0600 {} + \)
       ''}
+        ${strings.optionalString nixarr.anchorr.enable ''
+        chown -R ${globals.anchorr.user}:root "${nixarr.anchorr.stateDir}"
+        find "${nixarr.anchorr.stateDir}" \( -type d -exec chmod 0700 {} + -true \) -o \( -exec chmod 0600 {} + \)
+      ''}
         ${strings.optionalString nixarr.transmission.enable ''
         chown -R ${globals.transmission.user}:${globals.transmission.group} "${nixarr.mediaDir}/torrents"
         chown -R ${globals.transmission.user}:${globals.cross-seed.group} "${nixarr.transmission.stateDir}"
@@ -229,8 +233,8 @@ with lib; let
 
         echo "Wiping all nixarr users and groups from /etc/passwd and /etc/group..."
 
-        sed -i -E '/^(audiobookshelf|autobrr|bazarr|cross-seed|jellyfin|jellyseerr|lidarr|plex|prowlarr|qbittorrent|radarr|readarr|recyclarr|sabnzbd|shelfmark|sonarr|streamer|torrenter|transmission|usenet|whisparr|komgarr)/d' /etc/passwd
-        sed -i -E '/^(autobrr|cross-seed|jellyseerr|media|prowlarr|recyclarr|sabnzbd|streamer|torrenter|transmission|usenet)/d' /etc/group
+        sed -i -E '/^(anchorr|audiobookshelf|autobrr|bazarr|cross-seed|jellyfin|jellyseerr|lidarr|plex|prowlarr|qbittorrent|radarr|readarr|recyclarr|sabnzbd|shelfmark|sonarr|streamer|torrenter|transmission|usenet|whisparr|komgarr)/d' /etc/passwd
+        sed -i -E '/^(anchorr|autobrr|cross-seed|jellyseerr|media|prowlarr|recyclarr|sabnzbd|streamer|torrenter|transmission|usenet)/d' /etc/group
 
         echo ""
         echo "Done, please rebuild your configuration to get back the users and groups. This time, they will have the correct permissions."
