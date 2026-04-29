@@ -6,8 +6,36 @@
   ...
 }:
 with lib; let
+  inherit
+    (pkgs.writers)
+    writePython3Bin
+    ;
+
   nixarr = config.nixarr;
+  nixarr-py = nixarr.nixarr-py.package;
   globals = config.util-nixarr.globals;
+
+  show-prowlarr-schemas = writePython3Bin "show-prowlarr-schemas" {
+    libraries = [nixarr-py];
+    flakeIgnore = [
+      "E501" # Line too long
+    ];
+  } (builtins.readFile ./show-schemas/prowlarr.py);
+
+  show-radarr-schemas = writePython3Bin "show-radarr-schemas" {
+    libraries = [nixarr-py];
+    flakeIgnore = [
+      "E501" # Line too long
+    ];
+  } (builtins.readFile ./show-schemas/radarr.py);
+
+  show-sonarr-schemas = writePython3Bin "show-sonarr-schemas" {
+    libraries = [nixarr-py];
+    flakeIgnore = [
+      "E501" # Line too long
+    ];
+  } (builtins.readFile ./show-schemas/sonarr.py);
+
   nixarr-command = pkgs.writeShellApplication {
     name = "nixarr";
     runtimeInputs = with pkgs; [
@@ -15,12 +43,14 @@ with lib; let
       yq
       gnugrep
       gnused
+      show-prowlarr-schemas
+      show-radarr-schemas
+      show-sonarr-schemas
     ];
     text = ''
       command="''${1:-}"
 
-      # Check if a parameter is provided
-      if [ -z "$command" ]; then
+      show-usage() {
         echo "Usage: nixarr <command>"
         echo ""
         echo "Commands:"
@@ -31,6 +61,17 @@ with lib; let
         echo "  wipe-uids-gids        The update on 2025-06-03 causes issues with UID/GIDs,"
         echo "                        run this command, then rebuild and finally run"
         echo "                        nixarr fix-permissions, to fix these issues."
+        echo "  show-prowlarr-schemas <schema>"
+        echo "  show-sonarr-schemas <schema>"
+        echo "  show-radarr-schemas <schema>"
+        echo "                        Show schemas for various app settings."
+        echo "                        Requires the app to be enabled and running."
+        echo "                        See the per-app settings-sync documentation for more info."
+      }
+
+      # Check if a parameter is provided
+      if [ -z "$command" ]; then
+        show-usage
         exit 1
       fi
 
@@ -65,6 +106,11 @@ with lib; let
         chown -R ${globals.transmission.user}:${globals.cross-seed.group} "${nixarr.transmission.stateDir}"
         find "${nixarr.transmission.stateDir}" \( -type d -exec chmod 0750 {} + -true \) -o \( -exec chmod 0640 {} + \)
       ''}
+        ${strings.optionalString nixarr.qbittorrent.enable ''
+        chown -R ${globals.qbittorrent.user}:${globals.qbittorrent.group} "${nixarr.mediaDir}/qbittorrent"
+        chown -R ${globals.qbittorrent.user}:root "${nixarr.qbittorrent.stateDir}"
+        find "${nixarr.qbittorrent.stateDir}" \( -type d -exec chmod 0750 {} + -true \) -o \( -exec chmod 0640 {} + \)
+      ''}
         ${strings.optionalString nixarr.sabnzbd.enable ''
         chown -R ${globals.sabnzbd.user}:${globals.sabnzbd.group} "${nixarr.mediaDir}/usenet"
         chown -R ${globals.sabnzbd.user}:root "${nixarr.sabnzbd.stateDir}"
@@ -94,13 +140,9 @@ with lib; let
         chown -R ${globals.bazarr.user}:root "${nixarr.bazarr.stateDir}"
         find "${nixarr.bazarr.stateDir}" \( -type d -exec chmod 0700 {} + -true \) -o \( -exec chmod 0600 {} + \)
       ''}
-        ${strings.optionalString nixarr.readarr.enable ''
-        chown -R ${globals.readarr.user}:root "${nixarr.readarr.stateDir}"
-        find "${nixarr.readarr.stateDir}" \( -type d -exec chmod 0700 {} + -true \) -o \( -exec chmod 0600 {} + \)
-      ''}
-        ${strings.optionalString nixarr.readarr-audiobook.enable ''
-        chown -R ${globals.readarr-audiobook.user}:root "${nixarr.readarr-audiobook.stateDir}"
-        find "${nixarr.readarr-audiobook.stateDir}" \( -type d -exec chmod 0700 {} + -true \) -o \( -exec chmod 0600 {} + \)
+        ${strings.optionalString nixarr.shelfmark.enable ''
+        chown -R ${globals.shelfmark.user}:root "${nixarr.shelfmark.stateDir}"
+        find "${nixarr.shelfmark.stateDir}" \( -type d -exec chmod 0700 {} + -true \) -o \( -exec chmod 0600 {} + \)
       ''}
         ${strings.optionalString nixarr.jellyseerr.enable ''
         chown -R ${globals.jellyseerr.user}:root "${nixarr.jellyseerr.stateDir}"
@@ -157,14 +199,6 @@ with lib; let
         RADARR=$(xq '.Config.ApiKey' "${nixarr.radarr.stateDir}/config.xml")
         echo "Radarr api-key: $RADARR"
       ''}
-        ${strings.optionalString nixarr.readarr.enable ''
-        READARR=$(xq '.Config.ApiKey' "${nixarr.readarr.stateDir}/config.xml")
-        echo "Readarr api-key: $READARR"
-      ''}
-        ${strings.optionalString nixarr.readarr-audiobook.enable ''
-        READARR_AUDIOBOOK=$(xq -r '.Config.ApiKey' "${nixarr.readarr-audiobook.stateDir}/config.xml")
-        echo "Readarr Audiobook api-key: $READARR_AUDIOBOOK"
-      ''}
         ${strings.optionalString nixarr.sabnzbd.enable ''
         SABNZBD=$(grep api_key ${nixarr.sabnzbd.stateDir}/sabnzbd.ini | sed 's/^api_key.*= *//g')
         echo "Sabnzbd api-key: \"$SABNZBD\""
@@ -199,7 +233,7 @@ with lib; let
 
         echo "Wiping all nixarr users and groups from /etc/passwd and /etc/group..."
 
-        sed -i -E '/^(anchorr|audiobookshelf|autobrr|bazarr|cross-seed|jellyfin|jellyseerr|lidarr|plex|prowlarr|radarr|readarr|recyclarr|sabnzbd|sonarr|streamer|torrenter|transmission|usenet|whisparr|komgarr)/d' /etc/passwd
+        sed -i -E '/^(anchorr|audiobookshelf|autobrr|bazarr|cross-seed|jellyfin|jellyseerr|lidarr|plex|prowlarr|qbittorrent|radarr|readarr|recyclarr|sabnzbd|shelfmark|sonarr|streamer|torrenter|transmission|usenet|whisparr|komgarr)/d' /etc/passwd
         sed -i -E '/^(anchorr|autobrr|cross-seed|jellyseerr|media|prowlarr|recyclarr|sabnzbd|streamer|torrenter|transmission|usenet)/d' /etc/group
 
         echo ""
@@ -221,6 +255,53 @@ with lib; let
           ;;
         wipe-uids-gids)
           wipe-uids-gids
+          ;;
+        show-prowlarr-schemas)
+          ${
+        if nixarr.prowlarr.enable
+        then ''
+          show-prowlarr-schemas "$@"
+        ''
+        else ''
+          echo "Prowlarr is not enabled in your configuration."
+          echo "Please set config.nixarr.prowlarr.enable = true; and rebuild your configuration to use this command."
+          exit 1
+        ''
+      }
+          ;;
+        show-radarr-schemas)
+          ${
+        if nixarr.radarr.enable
+        then ''
+          show-radarr-schemas "$@"
+        ''
+        else ''
+          echo "Radarr is not enabled in your configuration."
+          echo "Please set config.nixarr.radarr.enable = true; and rebuild your configuration to use this command."
+          exit 1
+        ''
+      }
+          ;;
+        show-sonarr-schemas)
+          ${
+        if nixarr.sonarr.enable
+        then ''
+          show-sonarr-schemas "$@"
+        ''
+        else ''
+          echo "Sonarr is not enabled in your configuration."
+          echo "Please set config.nixarr.sonarr.enable = true; and rebuild your configuration to use this command."
+          exit 1
+        ''
+      }
+          ;;
+        -h|--help)
+          show-usage
+          ;;
+        *)
+          echo "Unknown command: $COMMAND"
+          show-usage
+          exit 1
           ;;
       esac
     '';

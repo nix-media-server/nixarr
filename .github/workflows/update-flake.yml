@@ -1,0 +1,48 @@
+name: Update Flake
+
+on:
+  schedule:
+    # Run weekly on Mondays at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-flake:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v3
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Install GitHub CLI
+        run: sudo apt-get update && sudo apt-get install -y gh
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create update branch
+        run: git checkout -b update-flake-$(date +%Y%m%d)
+
+      - name: Update flake
+        run: nix flake update
+
+      - name: Check for changes and create PR
+        run: |
+          git add .
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "flake: update dependencies"
+            gh pr create --title "Weekly flake update" --body "Automated update of flake dependencies" --base main
+          fi

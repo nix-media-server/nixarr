@@ -43,8 +43,7 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.whisparr.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
       description = "Open firewall for whisparr";
     };
@@ -65,6 +64,18 @@ in {
         Route whisparr traffic through the VPN.
       '';
     };
+
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.whisparr.vpn.enable`)(#nixarr.whisparr.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Whisparr web ui.
+      '';
+      defaultText = literalExpression "nixarr.whisparr.vpn.enable";
+    };
   };
 
   config = mkIf (nixarr.enable && cfg.enable) {
@@ -74,6 +85,13 @@ in {
         message = ''
           The nixarr.whisparr.vpn.enable option requires the
           nixarr.vpn.enable option to be set, but it was not.
+        '';
+      }
+      {
+        assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+        message = ''
+          The nixarr.whisparr.vpn.configureNginx option requires the
+          nixarr.whisparr.vpn.enable option to be set, but it was not.
         '';
       }
     ];
@@ -118,7 +136,7 @@ in {
       ];
     };
 
-    services.nginx = mkIf cfg.vpn.enable {
+    services.nginx = mkIf cfg.vpn.configureNginx {
       enable = true;
 
       recommendedTlsSettings = true;
@@ -128,7 +146,7 @@ in {
       virtualHosts."127.0.0.1:${builtins.toString cfg.port}" = {
         listen = [
           {
-            addr = "0.0.0.0";
+            addr = nixarr.vpn.proxyListenAddr;
             port = cfg.port;
           }
         ];

@@ -16,21 +16,22 @@ in {
     ./ddns
     ./jellyfin
     ./jellyseerr
-    ./lib/api-keys.nix
+    ./lib
     ./komga
     ./lidarr
     ./nixarr-command
     ./openssh
     ./plex
     ./prowlarr
+    ./qbittorrent
     ./radarr
-    ./readarr
-    ./readarr-audiobook
+    ./shelfmark
     ./recyclarr
     ./sabnzbd
     ./sonarr
     ./transmission
     ./whisparr
+    ./monitoring
     ../util
   ];
 
@@ -69,9 +70,9 @@ in {
         - [Lidarr](#nixarr.lidarr.enable)
         - [Plex](#nixarr.plex.enable)
         - [Prowlarr](#nixarr.prowlarr.enable)
+        - [qBittorrent](#nixarr.qbittorrent.enable)
         - [Radarr](#nixarr.radarr.enable)
-        - [Readarr](#nixarr.readarr.enable)
-        - [Readarr Audiobook](#nixarr.readarr-audiobook.enable)
+        - [Shelfmark](#nixarr.shelfmark.enable)
         - [Recyclarr](#nixarr.recyclarr.enable)
         - [SABnzbd](#nixarr.sabnzbd.enable)
         - [Sonarr](#nixarr.sonarr.enable)
@@ -202,6 +203,35 @@ in {
         '';
         example = [46382 38473];
       };
+
+      proxyListenAddr = mkOption {
+        type = types.str;
+        default = "0.0.0.0";
+        example = "127.0.0.1";
+        description = ''
+          The address that the nginx proxy should listen on when proxying
+          VPN-confined services. By default, it listens on all interfaces
+          (0.0.0.0), but you can set this to "127.0.0.1" if you want to
+          only expose services locally and then use another reverse proxy
+          (like Caddy) for external access.
+        '';
+      };
+
+      exposeOnLAN = mkOption {
+        type = types.bool;
+        default = true;
+        example = false;
+        description = ''
+          Whether to allow direct LAN access to VPN-confined services. When
+          enabled (default), services are accessible from the local network
+          (192.168.0.0/24 and 192.168.1.0/24). When disabled, services are
+          only accessible from localhost (127.0.0.1), which is useful when
+          using a reverse proxy like Caddy for all external access.
+
+          This is controlled by the VPN namespace firewall rules via the
+          accessibleFrom configuration.
+        '';
+      };
     };
   };
 
@@ -219,7 +249,7 @@ in {
     users.groups.media.members = cfg.mediaUsers;
 
     systemd.tmpfiles.rules = [
-      "d '${cfg.mediaDir}'  0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
+      "d '${cfg.mediaDir}'  2775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
     ];
 
     environment.systemPackages = with pkgs; [
@@ -233,11 +263,15 @@ in {
         protocol = "tcp";
       };
       accessibleFrom =
-        [
-          "192.168.1.0/24"
-          "192.168.0.0/24"
-          "127.0.0.1"
-        ]
+        (
+          if cfg.vpn.exposeOnLAN
+          then [
+            "192.168.1.0/24"
+            "192.168.0.0/24"
+            "127.0.0.1"
+          ]
+          else ["127.0.0.1"]
+        )
         ++ cfg.vpn.accessibleFrom;
       wireguardConfigFile = cfg.vpn.wgConf;
     };
@@ -267,10 +301,13 @@ in {
               echo "/etc/resolv.conf contains:"
               cat /etc/resolv.conf
 
-              # Query resolvconf
-              echo "resolvconf output:"
-              resolvconf -l
-              echo ""
+              # Check if resolvconf is available
+              if command -v resolvconf >/dev/null 2>&1; then
+                # Query resolvconf
+                echo "resolvconf output:"
+                resolvconf -l
+                echo ""
+              fi
 
               # Get ip
               echo "Getting IP:"

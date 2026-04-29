@@ -71,7 +71,7 @@ in {
           runtimeInputs = with pkgs; [miniupnpc];
 
           text = (
-            strings.concatMapStrings (x: "upnpc -r ${builtins.toString x} UDP" + "\n") cfg.openUpdPorts
+            strings.concatMapStrings (x: "upnpc -r ${builtins.toString x} UDP" + "\n") cfg.openUdpPorts
             ++ strings.concatMapStrings (x: "upnpc -r ${builtins.toString x} TCP" + "\n") cfg.openTcpPorts
             ++ ''echo "Successfully requested upnp ports to be opened".''
           );

@@ -24,6 +24,13 @@ in {
 
     package = mkPackageOption pkgs "jellyfin" {};
 
+    port = mkOption {
+      type = types.port;
+      default = defaultPort;
+      readOnly = true; # The Jellyfin port is weirdly hard to change.
+      description = "Port for Jellyfin to use.";
+    };
+
     stateDir = mkOption {
       type = types.path;
       default = "${nixarr.stateDir}/jellyfin";
@@ -45,8 +52,7 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.jellyfin.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
       description = "Open firewall for Jellyfin";
     };
@@ -62,6 +68,18 @@ in {
 
         Route Jellyfin traffic through the VPN.
       '';
+    };
+
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.jellyfin.vpn.enable`)(#nixarr.jellyfin.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Jellyfin web ui.
+      '';
+      defaultText = literalExpression "nixarr.jellyfin.vpn.enable";
     };
 
     expose = {
@@ -119,6 +137,13 @@ in {
         message = ''
           The nixarr.jellyfin.vpn.enable option conflicts with the
           nixarr.jellyfin.expose.https.enable option. You cannot set both.
+        '';
+      }
+      {
+        assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+        message = ''
+          The nixarr.jellyfin.vpn.configureNginx option requires the
+          nixarr.jellyfin.vpn.enable option to be set, but it was not.
         '';
       }
       {
@@ -188,7 +213,7 @@ in {
     };
 
     services.nginx = mkMerge [
-      (mkIf (cfg.expose.https.enable || cfg.vpn.enable) {
+      (mkIf (cfg.expose.https.enable || cfg.vpn.configureNginx) {
         enable = true;
 
         recommendedTlsSettings = true;
@@ -206,11 +231,11 @@ in {
           };
         };
       })
-      (mkIf cfg.vpn.enable {
+      (mkIf cfg.vpn.configureNginx {
         virtualHosts."127.0.0.1:${builtins.toString defaultPort}" = mkIf cfg.vpn.enable {
           listen = [
             {
-              addr = "0.0.0.0";
+              addr = nixarr.vpn.proxyListenAddr;
               port = defaultPort;
             }
           ];

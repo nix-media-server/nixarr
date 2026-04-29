@@ -110,10 +110,9 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.transmission.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
-      description = "Open firewall for `peer-port` and `rpc-port`.";
+      description = "Open firewall for `rpc-port`.";
     };
 
     extraAllowedIps = mkOption {
@@ -136,6 +135,18 @@ in {
 
         Route Transmission traffic through the VPN.
       '';
+    };
+
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.transmission.vpn.enable`)(#nixarr.transmission.vpn.enable)
+
+        Configure nginx as a reverse proxy for the transmission web ui.
+      '';
+      defaultText = literalExpression "nixarr.transmission.vpn.enable";
     };
 
     flood.enable = mkEnableOption "the flood web-UI for the transmission web-UI.";
@@ -234,10 +245,13 @@ in {
     };
 
     peerPort = mkOption {
-      type = types.port;
-      default = 50000;
-      example = 12345;
-      description = "Transmission peer traffic port.";
+      type = with types; nullOr port;
+      default = null;
+      example = 50000;
+      description = ''
+        Transmission peer traffic port. Also opens the firewall for listed
+        port if not set to null (default).
+      '';
     };
 
     uiPort = mkOption {
@@ -294,6 +308,13 @@ in {
           nixarr.prowlarr.enable option to be set, but it was not.
         '';
       }
+      {
+        assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+        message = ''
+          The nixarr.transmission.vpn.configureNginx option requires the
+          nixarr.transmission.vpn.enable option to be set, but it was not.
+        '';
+      }
     ];
 
     users = {
@@ -319,7 +340,7 @@ in {
       "d '${nixarr.mediaDir}/torrents/lidarr'      0755 ${globals.transmission.user} ${globals.transmission.group} - -"
       "d '${nixarr.mediaDir}/torrents/radarr'      0755 ${globals.transmission.user} ${globals.transmission.group} - -"
       "d '${nixarr.mediaDir}/torrents/sonarr'      0755 ${globals.transmission.user} ${globals.transmission.group} - -"
-      "d '${nixarr.mediaDir}/torrents/readarr'     0755 ${globals.transmission.user} ${globals.transmission.group} - -"
+      "d '${nixarr.mediaDir}/torrents/shelfmark'   0755 ${globals.transmission.user} ${globals.transmission.group} - -"
     ];
 
     util-nixarr.services.cross-seed = mkIf cfg-cross-seed.enable {
@@ -372,9 +393,8 @@ in {
         then pkgs.flood-for-transmission
         else null;
       package = cfg.package;
-      openFirewall = cfg.openFirewall;
       openRPCPort = cfg.openFirewall;
-      openPeerPorts = cfg.openFirewall;
+      openPeerPorts = cfg.peerPort != null;
       credentialsFile = cfg.credentialsFile;
       settings =
         {
@@ -401,7 +421,11 @@ in {
           blocklist-enabled = true;
           blocklist-url = "https://github.com/Naunter/BT_BlockLists/raw/master/bt_blocklists.gz";
 
-          peer-port = cfg.peerPort;
+          # 51413 is the default port, but if it's not explicitly set, we block the port
+          peer-port =
+            if cfg.peerPort != null
+            then cfg.peerPort
+            else 51413;
           dht-enabled = !cfg.privateTrackers.disableDhtPex;
           pex-enabled = !cfg.privateTrackers.disableDhtPex;
           utp-enabled = false;
@@ -459,7 +483,7 @@ in {
       ];
     };
 
-    services.nginx = mkIf cfg.vpn.enable {
+    services.nginx = mkIf cfg.vpn.configureNginx {
       enable = true;
 
       recommendedTlsSettings = true;
@@ -469,7 +493,7 @@ in {
       virtualHosts."127.0.0.1:${builtins.toString cfg.uiPort}" = {
         listen = [
           {
-            addr = "0.0.0.0";
+            addr = nixarr.vpn.proxyListenAddr;
             port = cfg.uiPort;
           }
         ];

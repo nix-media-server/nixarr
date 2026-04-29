@@ -42,8 +42,7 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.komga.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
       description = "Open firewall for Komga";
     };
@@ -59,6 +58,18 @@ in {
 
         Route Komga traffic through the VPN.
       '';
+    };
+
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.komga.vpn.enable`)(#nixarr.komga.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Komga web ui.
+      '';
+      defaultText = literalExpression "nixarr.komga.vpn.enable";
     };
 
     expose = {
@@ -116,6 +127,13 @@ in {
         message = ''
           The nixarr.komga.vpn.enable option conflicts with the
           nixarr.komga.expose.https.enable option. You cannot set both.
+        '';
+      }
+      {
+        assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+        message = ''
+          The nixarr.komga.vpn.configureNginx option requires the
+          nixarr.komga.vpn.enable option to be set, but it was not.
         '';
       }
       {
@@ -178,7 +196,7 @@ in {
     };
 
     services.nginx = mkMerge [
-      (mkIf (cfg.expose.https.enable || cfg.vpn.enable) {
+      (mkIf (cfg.expose.https.enable || cfg.vpn.configureNginx) {
         enable = true;
 
         recommendedTlsSettings = true;
@@ -196,11 +214,11 @@ in {
           };
         };
       })
-      (mkIf cfg.vpn.enable {
+      (mkIf cfg.vpn.configureNginx {
         virtualHosts."127.0.0.1:${builtins.toString defaultPort}" = mkIf cfg.vpn.enable {
           listen = [
             {
-              addr = "0.0.0.0";
+              addr = nixarr.vpn.proxyListenAddr;
               port = defaultPort;
             }
           ];

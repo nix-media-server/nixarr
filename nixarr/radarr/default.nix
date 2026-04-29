@@ -10,6 +10,8 @@ with lib; let
   port = 7878;
   nixarr = config.nixarr;
 in {
+  imports = [./settings-sync];
+
   options.nixarr.radarr = {
     enable = mkOption {
       type = types.bool;
@@ -49,8 +51,7 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.radarr.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
       description = "Open firewall for Radarr";
     };
@@ -65,6 +66,18 @@ in {
         Route Radarr traffic through the VPN.
       '';
     };
+
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.radarr.vpn.enable`)(#nixarr.radarr.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Radarr web ui.
+      '';
+      defaultText = literalExpression "nixarr.radarr.vpn.enable";
+    };
   };
 
   config = mkIf (nixarr.enable && cfg.enable) {
@@ -76,12 +89,23 @@ in {
           nixarr.vpn.enable option to be set, but it was not.
         '';
       }
+      {
+        assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+        message = ''
+          The nixarr.radarr.vpn.configureNginx option requires the
+          nixarr.radarr.vpn.enable option to be set, but it was not.
+        '';
+      }
     ];
 
     systemd.tmpfiles.rules = [
-      "d '${nixarr.mediaDir}/library'        0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
-      "d '${nixarr.mediaDir}/library/movies' 0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
+      "d '${nixarr.mediaDir}/library'        2775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
+      "d '${nixarr.mediaDir}/library/movies' 2775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
     ];
+
+    # Set UMask to 0002 so directories are created with group write permission (775)
+    # This allows other services in the media group (like Jellyfin) to modify files
+    systemd.services.radarr.serviceConfig.UMask = lib.mkForce "0002";
 
     users = {
       groups.${globals.radarr.group}.gid = globals.gids.${globals.radarr.group};
@@ -118,7 +142,7 @@ in {
       ];
     };
 
-    services.nginx = mkIf cfg.vpn.enable {
+    services.nginx = mkIf cfg.vpn.configureNginx {
       enable = true;
 
       recommendedTlsSettings = true;
@@ -128,7 +152,7 @@ in {
       virtualHosts."127.0.0.1:${builtins.toString cfg.port}" = {
         listen = [
           {
-            addr = "0.0.0.0";
+            addr = nixarr.vpn.proxyListenAddr;
             port = cfg.port;
           }
         ];

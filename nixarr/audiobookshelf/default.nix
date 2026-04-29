@@ -55,10 +55,16 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.audiobookshelf.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
       description = "Open firewall for Audiobookshelf";
+    };
+
+    host = mkOption {
+      description = "The host Audiobookshelf binds to.";
+      default = "127.0.0.1";
+      example = "0.0.0.0";
+      type = types.str;
     };
 
     vpn.enable = mkOption {
@@ -72,6 +78,18 @@ in {
 
         Route Audiobookshelf traffic through the VPN.
       '';
+    };
+
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.audiobookshelf.vpn.enable`)(#nixarr.audiobookshelf.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Audiobookshelf web ui.
+      '';
+      defaultText = literalExpression "nixarr.audiobookshelf.vpn.enable";
     };
 
     expose = {
@@ -119,7 +137,7 @@ in {
     host =
       if cfg.vpn.enable
       then "192.168.15.1"
-      else "127.0.0.1";
+      else cfg.host;
   in
     mkIf (nixarr.enable && cfg.enable) {
       assertions = [
@@ -135,6 +153,13 @@ in {
           message = ''
             The nixarr.audiobookshelf.vpn.enable option conflicts with the
             nixarr.audiobookshelf.expose.https.enable option. You cannot set both.
+          '';
+        }
+        {
+          assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+          message = ''
+            The nixarr.audiobookshelf.vpn.configureNginx option requires the
+            nixarr.audiobookshelf.vpn.enable option to be set, but it was not.
           '';
         }
         {
@@ -207,9 +232,14 @@ in {
         };
       };
 
-      networking.firewall = mkIf cfg.expose.https.enable {
-        allowedTCPPorts = [80 443];
-      };
+      networking.firewall = mkMerge [
+        (mkIf cfg.openFirewall {
+          allowedTCPPorts = [cfg.port];
+        })
+        (mkIf cfg.expose.https.enable {
+          allowedTCPPorts = [80 443];
+        })
+      ];
 
       util-nixarr.upnp = mkIf cfg.expose.https.upnp.enable {
         enable = true;
@@ -217,7 +247,7 @@ in {
       };
 
       services.nginx = mkMerge [
-        (mkIf (cfg.expose.https.enable || cfg.vpn.enable) {
+        (mkIf (cfg.expose.https.enable || cfg.vpn.configureNginx) {
           enable = true;
 
           recommendedTlsSettings = true;
@@ -235,11 +265,11 @@ in {
             };
           };
         })
-        (mkIf cfg.vpn.enable {
+        (mkIf cfg.vpn.configureNginx {
           virtualHosts."127.0.0.1:${builtins.toString cfg.port}" = mkIf cfg.vpn.enable {
             listen = [
               {
-                addr = "0.0.0.0";
+                addr = nixarr.vpn.proxyListenAddr;
                 port = cfg.port;
               }
             ];

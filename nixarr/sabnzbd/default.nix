@@ -44,8 +44,7 @@ in {
 
     openFirewall = mkOption {
       type = types.bool;
-      defaultText = literalExpression ''!nixarr.sabnzbd.vpn.enable'';
-      default = !cfg.vpn.enable;
+      default = false;
       example = true;
       description = "Open firewall for SABnzbd";
     };
@@ -95,6 +94,18 @@ in {
 
         Route SABnzbd traffic through the VPN.
       '';
+    };
+
+    vpn.configureNginx = mkOption {
+      type = types.bool;
+      default = cfg.vpn.enable;
+      example = false;
+      description = ''
+        **Required options:** [`nixarr.sabnzbd.vpn.enable`)(#nixarr.sabnzbd.vpn.enable)
+
+        Configure nginx as a reverse proxy for the Sabnzbd web ui.
+      '';
+      defaultText = literalExpression "nixarr.sabnzbd.vpn.enable";
     };
   };
 
@@ -181,8 +192,15 @@ in {
         {
           assertion = cfg.vpn.enable -> nixarr.vpn.enable;
           message = ''
-            The nixarr.readarr.vpn.enable option requires the
+            The nixarr.sabnzbd.vpn.enable option requires the
             nixarr.vpn.enable option to be set, but it was not.
+          '';
+        }
+        {
+          assertion = cfg.vpn.configureNginx -> cfg.vpn.enable;
+          message = ''
+            The nixarr.sabnzbd.vpn.configureNginx option requires the
+            nixarr.sabnzbd.vpn.enable option to be set, but it was not.
           '';
         }
       ];
@@ -208,7 +226,7 @@ in {
         "d '${nixarr.mediaDir}/usenet/lidarr'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
         "d '${nixarr.mediaDir}/usenet/radarr'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
         "d '${nixarr.mediaDir}/usenet/sonarr'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/readarr'     0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
+        "d '${nixarr.mediaDir}/usenet/shelfmark'   0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
       ];
 
       services.sabnzbd = {
@@ -246,7 +264,7 @@ in {
         ];
       };
 
-      services.nginx = mkIf cfg.vpn.enable {
+      services.nginx = mkIf cfg.vpn.configureNginx {
         enable = true;
 
         recommendedTlsSettings = true;
@@ -256,7 +274,7 @@ in {
         virtualHosts."127.0.0.1:${builtins.toString cfg.guiPort}" = {
           listen = [
             {
-              addr = "0.0.0.0";
+              addr = nixarr.vpn.proxyListenAddr;
               port = cfg.guiPort;
             }
           ];

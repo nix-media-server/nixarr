@@ -226,12 +226,11 @@ in {
       requiredBy = ["recyclarr.service"];
       before = ["recyclarr.service"];
       requires =
-        (optionals nixarr.radarr.enable ["radarr.service" "radarr-api-key.service"])
-        ++ (optionals nixarr.sonarr.enable ["sonarr.service" "sonarr-api-key.service"]);
+        (optional nixarr.radarr.enable "radarr-api.service")
+        ++ (optional nixarr.sonarr.enable "sonarr-api.service");
       after =
-        (optionals nixarr.radarr.enable ["radarr.service" "radarr-api-key.service"])
-        ++ (optionals nixarr.sonarr.enable ["sonarr.service" "sonarr-api-key.service"]);
-
+        (optional nixarr.radarr.enable "radarr-api.service")
+        ++ (optional nixarr.sonarr.enable "sonarr-api.service");
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
@@ -242,11 +241,11 @@ in {
           echo -n > '${cfg.stateDir}/env'
           ${optionalString nixarr.radarr.enable ''
             printf RADARR_API_KEY= >> '${cfg.stateDir}/env'
-            cat '${nixarr.stateDir}/api-keys/radarr.key' >> '${cfg.stateDir}/env'
+            cat '${nixarr.stateDir}/secrets/radarr.api-key' >> '${cfg.stateDir}/env'
           ''}
           ${optionalString nixarr.sonarr.enable ''
             printf SONARR_API_KEY= >> '${cfg.stateDir}/env'
-            cat '${nixarr.stateDir}/api-keys/sonarr.key' >> '${cfg.stateDir}/env'
+            cat '${nixarr.stateDir}/secrets/sonarr.api-key' >> '${cfg.stateDir}/env'
           ''}
         '';
       };
