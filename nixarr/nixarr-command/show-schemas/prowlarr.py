@@ -5,10 +5,12 @@ import prowlarr
 import json
 import argparse
 
+
 def datetime_serializer(obj):
     if isinstance(obj, datetime):
         return obj.isoformat()
     raise TypeError(f"Type {type(obj)} not serializable")
+
 
 def main(client: prowlarr.ApiClient, kind: str) -> None:
     schema: Union[dict[str, Any], list[dict[str, Any]]] = []
