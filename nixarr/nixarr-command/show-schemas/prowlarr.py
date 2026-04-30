@@ -1,9 +1,14 @@
+from datetime import datetime
 from typing import Any, Union
 from nixarr_py.clients import prowlarr_client
 import prowlarr
 import json
 import argparse
 
+def datetime_serializer(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError(f"Type {type(obj)} not serializable")
 
 def main(client: prowlarr.ApiClient, kind: str) -> None:
     schema: Union[dict[str, Any], list[dict[str, Any]]] = []
@@ -38,7 +43,8 @@ def main(client: prowlarr.ApiClient, kind: str) -> None:
         ]
     else:
         raise ValueError(f"Unknown schema kind: {kind}")
-    print(json.dumps(schema, sort_keys=True))
+
+    print(json.dumps(schema, sort_keys=True, default=datetime_serializer))
 
 
 if __name__ == "__main__":
