@@ -1,5 +1,6 @@
 {
   config,
+  options,
   lib,
   pkgs,
   ...
@@ -105,6 +106,21 @@ in {
           nixarr.shelfmark.vpn.enable option to be set, but it was not.
         '';
       }
+      {
+        assertion = options.services ? shelfmark;
+        message = ''
+          You have tried to set nixarr.shelfmark.enable = true,
+          but your nixpkgs version does not contain a shelfmark
+          module.
+
+          Shelfmark is present in nixpkgs from 26.05 onwards.
+
+          You may either
+          - Upgrade your nixpkgs version to at least 26.05, or
+          - Add unstable nixpkgs as an additional dependency and import
+            ''${nixpkgs-unstable.path}/nixos/modules/services/misc/shelfmark.nix
+        '';
+      }
     ];
 
     users = {
@@ -124,19 +140,45 @@ in {
       "d '${nixarr.mediaDir}/library/audiobooks' 0775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
     ];
 
-    services.shelfmark = {
-      enable = true;
-      package = cfg.package;
-      openFirewall = cfg.openFirewall;
-      environment = {
-        FLASK_HOST =
-          if cfg.vpn.enable
-          then "192.168.15.1"
-          else cfg.host;
-        FLASK_PORT = cfg.port;
-        CONFIG_DIR = cfg.stateDir;
+    services =
+      {
+        nginx = mkIf cfg.vpn.configureNginx {
+          enable = true;
+
+          recommendedTlsSettings = true;
+          recommendedOptimisation = true;
+          recommendedGzipSettings = true;
+
+          virtualHosts."127.0.0.1:${builtins.toString cfg.port}" = {
+            listen = [
+              {
+                addr = nixarr.vpn.proxyListenAddr;
+                port = cfg.port;
+              }
+            ];
+            locations."/" = {
+              recommendedProxySettings = true;
+              proxyWebsockets = true;
+              proxyPass = "http://192.168.15.1:${builtins.toString cfg.port}";
+            };
+          };
+        };
+      }
+      // lib.optionalAttrs (options.services ? shelfmark) {
+        shelfmark = {
+          enable = true;
+          package = cfg.package;
+          openFirewall = cfg.openFirewall;
+          environment = {
+            FLASK_HOST =
+              if cfg.vpn.enable
+              then "192.168.15.1"
+              else cfg.host;
+            FLASK_PORT = cfg.port;
+            CONFIG_DIR = cfg.stateDir;
+          };
+        };
       };
-    };
 
     systemd.services.shelfmark.serviceConfig = {
       DynamicUser = mkForce false;
@@ -159,28 +201,6 @@ in {
           to = cfg.port;
         }
       ];
-    };
-
-    services.nginx = mkIf cfg.vpn.configureNginx {
-      enable = true;
-
-      recommendedTlsSettings = true;
-      recommendedOptimisation = true;
-      recommendedGzipSettings = true;
-
-      virtualHosts."127.0.0.1:${builtins.toString cfg.port}" = {
-        listen = [
-          {
-            addr = nixarr.vpn.proxyListenAddr;
-            port = cfg.port;
-          }
-        ];
-        locations."/" = {
-          recommendedProxySettings = true;
-          proxyWebsockets = true;
-          proxyPass = "http://192.168.15.1:${builtins.toString cfg.port}";
-        };
-      };
     };
   };
 }

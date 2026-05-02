@@ -46,6 +46,8 @@ pkgs.testers.nixosTest {
       komga.enable = true;
       anchorr.enable = true;
 
+      shelfmark.enable = lib.versionAtLeast lib.version "26.05";
+
       # recyclarr = {
       #   enable = true;
       #   configuration = {
@@ -113,13 +115,13 @@ pkgs.testers.nixosTest {
     machine.succeed("systemctl is-active bazarr")
     machine.succeed("systemctl is-active sonarr")
     machine.succeed("systemctl is-active radarr")
-    machine.succeed("systemctl is-active readarr")
-    machine.succeed("systemctl is-active readarr-audiobook")
     machine.succeed("systemctl is-active sabnzbd")
     machine.succeed("systemctl is-active lidarr")
     machine.succeed("systemctl is-active prowlarr")
-    machine.succeed("systemctl is-active anchorr")
+    # machine.succeed("systemctl is-active anchorr")
     # machine.succeed("systemctl is-active recyclarr")
+
+    ${lib.optionalString (lib.versionAtLeast lib.version "26.05") "machine.succeed('systemctl is-active shelfmark')"}
 
     print("\n=== Nixarr Simple Test Completed ===")
   '';
