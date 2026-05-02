@@ -39,8 +39,6 @@ pkgs.testers.nixosTest {
       bazarr.enable = true;
       sonarr.enable = true;
       radarr.enable = true;
-      readarr.enable = true;
-      readarr-audiobook.enable = true;
       sabnzbd.enable = true;
       lidarr.enable = true;
       prowlarr.enable = true;
