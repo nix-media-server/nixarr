@@ -229,8 +229,8 @@ in {
       description = "Setup Anchorr configuration and environment";
       requiredBy = ["anchorr.service"];
       before = ["anchorr.service"];
-      requires = optional nixarr.jellyseerr.enable "jellyseerr-api-key.service";
-      after = optional nixarr.jellyseerr.enable "jellyseerr-api-key.service";
+      requires = optional nixarr.seerr.enable "seerr-api.service";
+      after = optional nixarr.seerr.enable "seerr-api.service";
 
       serviceConfig = {
         Type = "oneshot";
@@ -268,10 +268,10 @@ in {
             echo "" >> "$ENV_FILE"
           ''}
 
-          ${optionalString (nixarr.jellyseerr.enable && cfg.jellyseerr.apiKeyFile == null) ''
-            if [[ -f '${nixarr.stateDir}/api-keys/jellyseerr.key' ]]; then
+          ${optionalString (nixarr.seerr.enable && cfg.jellyseerr.apiKeyFile == null) ''
+            if [[ -f '${nixarr.stateDir}/secrets/seerr.api-key' ]]; then
               printf "JELLYSEERR_API_KEY=" >> "$ENV_FILE"
-              cat '${nixarr.stateDir}/api-keys/jellyseerr.key' >> "$ENV_FILE"
+              cat '${nixarr.stateDir}/secrets/seerr.api-key' >> "$ENV_FILE"
               echo "" >> "$ENV_FILE"
             fi
           ''}
@@ -338,7 +338,7 @@ in {
         isSystemUser = true;
         group = globals.anchorr.group;
         uid = globals.uids.${globals.anchorr.user};
-        extraGroups = optional nixarr.jellyseerr.enable "jellyseerr-api";
+        extraGroups = optional nixarr.seerr.enable "seerr-api";
       };
     };
 

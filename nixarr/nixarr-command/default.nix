@@ -144,9 +144,9 @@ with lib; let
         chown -R ${globals.shelfmark.user}:root "${nixarr.shelfmark.stateDir}"
         find "${nixarr.shelfmark.stateDir}" \( -type d -exec chmod 0700 {} + -true \) -o \( -exec chmod 0600 {} + \)
       ''}
-        ${strings.optionalString nixarr.jellyseerr.enable ''
-        chown -R ${globals.jellyseerr.user}:root "${nixarr.jellyseerr.stateDir}"
-        find "${nixarr.jellyseerr.stateDir}" \( -type d -exec chmod 0700 {} + -true \) -o \( -exec chmod 0600 {} + \)
+        ${strings.optionalString nixarr.seerr.enable ''
+        chown -R ${globals.seerr.user}:root "${nixarr.seerr.stateDir}"
+        find "${nixarr.seerr.stateDir}" \( -type d -exec chmod 0700 {} + -true \) -o \( -exec chmod 0600 {} + \)
       ''}
         ${strings.optionalString nixarr.autobrr.enable ''
         chown -R ${globals.autobrr.user}:root "${nixarr.autobrr.stateDir}"
@@ -183,9 +183,9 @@ with lib; let
         BAZARR=$(yq '.auth.apikey' "${nixarr.bazarr.stateDir}/config/config.yaml")
         echo "Bazarr api-key: $BAZARR"
       ''}
-        ${strings.optionalString nixarr.jellyseerr.enable ''
-        JELLYSEERR=$(yq '.main.apiKey' "${nixarr.jellyseerr.stateDir}/settings.json")
-        echo "Jellyseerr api-key: $JELLYSEERR"
+        ${strings.optionalString nixarr.seerr.enable ''
+        SEERR=$(yq '.main.apiKey' "${nixarr.seerr.stateDir}/settings.json")
+        echo "Seerr api-key: $SEERR"
       ''}
         ${strings.optionalString nixarr.lidarr.enable ''
         LIDARR=$(xq '.Config.ApiKey' "${nixarr.lidarr.stateDir}/config.xml")
@@ -233,8 +233,8 @@ with lib; let
 
         echo "Wiping all nixarr users and groups from /etc/passwd and /etc/group..."
 
-        sed -i -E '/^(anchorr|audiobookshelf|autobrr|bazarr|cross-seed|jellyfin|jellyseerr|lidarr|plex|prowlarr|qbittorrent|radarr|readarr|recyclarr|sabnzbd|shelfmark|sonarr|streamer|torrenter|transmission|usenet|whisparr|komgarr)/d' /etc/passwd
-        sed -i -E '/^(anchorr|autobrr|cross-seed|jellyseerr|media|prowlarr|recyclarr|sabnzbd|streamer|torrenter|transmission|usenet)/d' /etc/group
+        sed -i -E '/^(anchorr|audiobookshelf|autobrr|bazarr|cross-seed|jellyfin|jellyseerr|lidarr|plex|prowlarr|qbittorrent|radarr|readarr|recyclarr|sabnzbd|seerr|shelfmark|sonarr|streamer|torrenter|transmission|usenet|whisparr|komgarr)/d' /etc/passwd
+        sed -i -E '/^(anchorr|autobrr|cross-seed|jellyseerr|media|prowlarr|recyclarr|sabnzbd|seerr|streamer|torrenter|transmission|usenet)/d' /etc/group
 
         echo ""
         echo "Done, please rebuild your configuration to get back the users and groups. This time, they will have the correct permissions."
