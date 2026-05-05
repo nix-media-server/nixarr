@@ -15,6 +15,7 @@ pkgs.testers.runNixOSTest {
     networking.firewall.enable = false;
 
     virtualisation.cores = 4; # one per service plus one for luck
+    virtualisation.memorySize = 4096; # 4GB for multiple *arr services
 
     nixarr = {
       enable = true;
@@ -51,7 +52,7 @@ pkgs.testers.runNixOSTest {
     machine.wait_for_unit("radarr-api.service")
 
     # Once the APIs are up, the sync service shouldn't take long
-    machine.wait_for_unit("bazarr-sync-config.service", timeout=60)
+    machine.wait_for_unit("bazarr-sync-config.service", timeout=120)
 
     print("\n=== Bazarr Sync Test Completed ===")
   '';

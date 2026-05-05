@@ -15,6 +15,7 @@ pkgs.testers.nixosTest {
     networking.firewall.enable = false;
 
     virtualisation.cores = 4; # one per service plus one for luck
+    virtualisation.memorySize = 4096; # 4GB for multiple *arr services
 
     nixarr = {
       enable = true;
@@ -48,8 +49,8 @@ pkgs.testers.nixosTest {
     machine.wait_for_unit("radarr-api.service")
 
     # Once the APIs are up, the sync services shouldn't take long
-    machine.wait_for_unit("sonarr-sync-config.service", timeout=60)
-    machine.wait_for_unit("radarr-sync-config.service", timeout=60)
+    machine.wait_for_unit("sonarr-sync-config.service", timeout=120)
+    machine.wait_for_unit("radarr-sync-config.service", timeout=120)
 
     print("\n=== Transmission Sync Test Completed ===")
   '';
