@@ -108,6 +108,7 @@ in {
     };
 
     systemd.tmpfiles.rules = [
+      "d '${cfg.stateDir}' 0700 ${globals.sonarr.user} root - -"
       "d '${nixarr.mediaDir}/library'        2775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
       "d '${nixarr.mediaDir}/library/shows'  2775 ${globals.libraryOwner.user} ${globals.libraryOwner.group} - -"
     ];
