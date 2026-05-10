@@ -18,6 +18,7 @@
     setuptools
     typing-extensions
     urllib3
+    requests
     ;
 
   lazy-imports = buildPythonPackage rec {

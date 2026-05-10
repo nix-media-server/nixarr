@@ -176,6 +176,8 @@ def ensure_admin_user_created_and_wizard_completed() -> None:
     This uses an admin user client to verify the user exists, so it will
     invalidate any other nixarr-py admin-user Jellyfin clients.
     """
+    from jellyfin.exceptions import UnauthorizedException
+
     client = unauthenticated_client()
     wait_until_ready(client)
 
@@ -198,7 +200,22 @@ def ensure_admin_user_created_and_wizard_completed() -> None:
         time.sleep(5)
         wait_until_ready(client)
 
-    admin_user_client()  # Ensure admin user client works
+        # Verify admin user client works after completing wizard
+        admin_user_client()
+    else:
+        # Wizard already completed - try to verify admin user client works
+        # If authentication fails, it means the password file doesn't match
+        # the actual Jellyfin user password (e.g., wizard was completed manually)
+        try:
+            admin_user_client()
+        except UnauthorizedException:
+            cfg = get_jellyfin_config()
+            raise RuntimeError(
+                f"Jellyfin wizard is already completed, but authentication failed. "
+                f"The password in '{cfg.admin_password_file}' does not match the "
+                f"password for the '{cfg.admin_username}' user in Jellyfin. "
+                f"Please update the password file with the correct password."
+            )
 
 
 def wait_until_ready(client: jellyfin.ApiClient) -> None:
