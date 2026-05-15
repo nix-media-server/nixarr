@@ -170,11 +170,11 @@ in {
       text = ''
         if ${pkgs.gnugrep}/bin/grep -q '^jellyseerr:' /etc/passwd && ! ${pkgs.gnugrep}/bin/grep -q '^seerr:' /etc/passwd; then
           echo "nixarr: renaming jellyseerr user to seerr in /etc/passwd"
-          ${pkgs.gnused}/bin/sed -i 's/^jellyseerr:/seerr:/' /etc/passwd
+          ${pkgs.gnused}/bin/sed -i --follow-symlinks 's/^jellyseerr:/seerr:/' /etc/passwd
         fi
         if ${pkgs.gnugrep}/bin/grep -q '^jellyseerr:' /etc/group && ! ${pkgs.gnugrep}/bin/grep -q '^seerr:' /etc/group; then
           echo "nixarr: renaming jellyseerr group to seerr in /etc/group"
-          ${pkgs.gnused}/bin/sed -i 's/^jellyseerr:/seerr:/' /etc/group
+          ${pkgs.gnused}/bin/sed -i --follow-symlinks 's/^jellyseerr:/seerr:/' /etc/group
         fi
       '';
     };
