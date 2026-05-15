@@ -179,7 +179,11 @@ in {
       '';
     };
 
-    system.activationScripts.users.deps = lib.mkAfter ["migrate-seerr-user"];
+    # nixpkgs sets system.activationScripts.users to "" under sysusers/userborn
+    system.activationScripts.users =
+      lib.mkIf
+      (!(config.systemd.sysusers.enable or false) && !(config.services.userborn.enable or false))
+      {deps = lib.mkAfter ["migrate-seerr-user"];};
 
     system.activationScripts.migrate-seerr-state = {
       # Must run after user migration so the renamed seerr user owns the moved directory
