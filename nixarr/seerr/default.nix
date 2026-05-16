@@ -170,16 +170,20 @@ in {
       text = ''
         if ${pkgs.gnugrep}/bin/grep -q '^jellyseerr:' /etc/passwd && ! ${pkgs.gnugrep}/bin/grep -q '^seerr:' /etc/passwd; then
           echo "nixarr: renaming jellyseerr user to seerr in /etc/passwd"
-          ${pkgs.gnused}/bin/sed -i 's/^jellyseerr:/seerr:/' /etc/passwd
+          ${pkgs.gnused}/bin/sed -i --follow-symlinks 's/^jellyseerr:/seerr:/' /etc/passwd
         fi
         if ${pkgs.gnugrep}/bin/grep -q '^jellyseerr:' /etc/group && ! ${pkgs.gnugrep}/bin/grep -q '^seerr:' /etc/group; then
           echo "nixarr: renaming jellyseerr group to seerr in /etc/group"
-          ${pkgs.gnused}/bin/sed -i 's/^jellyseerr:/seerr:/' /etc/group
+          ${pkgs.gnused}/bin/sed -i --follow-symlinks 's/^jellyseerr:/seerr:/' /etc/group
         fi
       '';
     };
 
-    system.activationScripts.users.deps = lib.mkAfter ["migrate-seerr-user"];
+    # nixpkgs sets system.activationScripts.users to "" under sysusers/userborn
+    system.activationScripts.users =
+      lib.mkIf
+      (!(config.systemd.sysusers.enable or false) && !(config.services.userborn.enable or false))
+      {deps = lib.mkAfter ["migrate-seerr-user"];};
 
     system.activationScripts.migrate-seerr-state = {
       # Must run after user migration so the renamed seerr user owns the moved directory
