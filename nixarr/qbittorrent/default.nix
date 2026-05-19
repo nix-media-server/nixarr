@@ -45,8 +45,8 @@ with lib; let
         "Session\\MaxActiveDownloads" = 5;
         "Session\\MaxActiveTorrents" = 10;
         "Session\\MaxActiveUploads" = 10;
-        "Session\\QueueingSystemEnabled" = true;
-        "Session\\IgnoreSlowTorrentsForQueueing" = true;
+        "Session\\QueueingSystemEnabled" = cfg.torrentQueueing.enable;
+        "Session\\IgnoreSlowTorrentsForQueueing" = cfg.torrentQueueing.enable;
 
         # Categories for *arr apps (paths relative to DefaultSavePath)
         "Session\\DisableAutoTMMByDefault" = false; # Enable automatic torrent management
@@ -206,6 +206,22 @@ in {
           Disable DHT, PeX, and LSD, which is required by some private trackers.
 
           This also enables anonymous mode in qBittorrent.
+        '';
+      };
+    };
+
+    torrentQueueing = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        example = true;
+        description = ''
+          Enable qBittorrent's torrent queueing system.
+
+          When enabled (default), active downloads and uploads are limited by the
+          MaxActive* session settings in the generated configuration.
+          When disabled, all seeding torrents stay active. This is
+          preferred on private trackers, which need to see every seeded torrent.
         '';
       };
     };
