@@ -3,6 +3,9 @@
 ## Unreleased
 
 Added:
+- **SABnzbd `incompleteDir`**: Redirect in-progress downloads to a separate
+  path, while completed downloads stay on `nixarr.mediaDir`.
+  Use `nixarr.sabnzbd.incompleteDir`.
 - **Declarative settings-sync** for multiple services, allowing configuration
   via Nix options instead of manual UI setup:
   - **Prowlarr:** Declaratively manage indexers, applications (Sonarr, Radarr,
@@ -18,6 +21,8 @@ Added:
     `nixarr.bazarr.settings-sync.sonarr.enable = true` and
     `nixarr.bazarr.settings-sync.radarr.enable = true` with optional filtering
     for monitored content only.
+  - **SABnzbd:** Declaratively configure usenet servers via 
+    `nixarr.sabnzbd.settings-sync.servers`.
 - **1984 DDNS** options.
 - **qBittorrent service** with VPN confinement support, [qui](https://github.com/autobrr/qui)
   WebUI (enabled by default), private tracker mode, Prometheus exporter, and

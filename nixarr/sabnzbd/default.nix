@@ -9,6 +9,8 @@ with lib; let
   globals = config.util-nixarr.globals;
   nixarr = config.nixarr;
 in {
+  imports = [./settings-sync];
+
   options.nixarr.sabnzbd = {
     enable = mkEnableOption "Enable the SABnzbd service.";
 
@@ -107,6 +109,28 @@ in {
       '';
       defaultText = literalExpression "nixarr.sabnzbd.vpn.enable";
     };
+
+    incompleteDir = mkOption {
+      type = types.path;
+      default = nixarr.mediaDir;
+      defaultText = literalExpression "config.nixarr.mediaDir";
+      example = "/flash";
+      description = ''
+        Directory used for in-progress (incomplete) SABnzbd downloads.
+        Completed downloads move to `nixarr.mediaDir`.
+
+        Defaults to `nixarr.mediaDir`.
+
+        > **Warning:** Setting this to any path, where the subpath is not
+        > owned by root, will fail! For example:
+        >
+        > ```nix
+        >   nixarr.sabnzbd.incompleteDir = /home/user/flash
+        > ```
+        >
+        > Is not supported, because `/home/user` is owned by `user`.
+      '';
+    };
   };
 
   config = let
@@ -127,7 +151,7 @@ in {
           then "192.168.15.1"
           else "127.0.0.1";
         port = cfg.guiPort;
-        download_dir = "${nixarr.mediaDir}/usenet/.incomplete";
+        download_dir = "${cfg.incompleteDir}/usenet/.incomplete";
         complete_dir = "${nixarr.mediaDir}/usenet/manual";
         dirscan_dir = "${nixarr.mediaDir}/usenet/watch";
         host_whitelist = concatStringsCommaIfExists cfg.whitelistHostnames;
@@ -219,14 +243,14 @@ in {
         "C ${cfg.stateDir}/sabnzbd.ini - - - - ${ini-base-config-file}"
 
         # Media dirs
-        "d '${nixarr.mediaDir}/usenet'             0755 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/.incomplete' 0755 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/.watch'      0755 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/manual'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/lidarr'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/radarr'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/sonarr'      0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
-        "d '${nixarr.mediaDir}/usenet/shelfmark'   0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
+        "d '${nixarr.mediaDir}/usenet'               0755 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
+        "d '${cfg.incompleteDir}/usenet/.incomplete' 0755 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
+        "d '${nixarr.mediaDir}/usenet/.watch'        0755 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
+        "d '${nixarr.mediaDir}/usenet/manual'        0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
+        "d '${nixarr.mediaDir}/usenet/lidarr'        0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
+        "d '${nixarr.mediaDir}/usenet/radarr'        0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
+        "d '${nixarr.mediaDir}/usenet/sonarr'        0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
+        "d '${nixarr.mediaDir}/usenet/shelfmark'     0775 ${globals.sabnzbd.user} ${globals.sabnzbd.group} - -"
       ];
 
       services.sabnzbd = {
