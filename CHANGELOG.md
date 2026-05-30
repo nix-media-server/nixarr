@@ -64,6 +64,8 @@ Fixed:
 - qBittorrent `fix-permissions` now uses the correct download path.
 - Jellyfin authentication cleaned up: uses shared API key instead of creating
   a new device UUID per connection.
+- **Recyclarr v8 compatibility**: `--app-data` was removed in recyclarr v8.0.0
+    in favor of `RECYCLARR_CONFIG_DIR` and `RECYCLARR_DATA_DIR` env vars.
 
 Removed:
 - Readarr and Readarr-audiobook, use shelfmark
