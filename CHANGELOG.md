@@ -3,6 +3,9 @@
 ## Unreleased
 
 Added:
+- **SABnzbd `incompleteDir`**: Redirect in-progress downloads to a separate
+  path, while completed downloads stay on `nixarr.mediaDir`.
+  Use `nixarr.sabnzbd.incompleteDir`.
 - **Declarative settings-sync** for multiple services, allowing configuration
   via Nix options instead of manual UI setup:
   - **Prowlarr:** Declaratively manage indexers, applications (Sonarr, Radarr,
