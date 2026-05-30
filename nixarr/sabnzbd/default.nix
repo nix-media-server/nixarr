@@ -9,8 +9,6 @@ with lib; let
   globals = config.util-nixarr.globals;
   nixarr = config.nixarr;
 in {
-  imports = [./settings-sync];
-
   options.nixarr.sabnzbd = {
     enable = mkEnableOption "Enable the SABnzbd service.";
 

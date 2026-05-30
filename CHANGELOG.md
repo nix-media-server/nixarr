@@ -21,8 +21,6 @@ Added:
     `nixarr.bazarr.settings-sync.sonarr.enable = true` and
     `nixarr.bazarr.settings-sync.radarr.enable = true` with optional filtering
     for monitored content only.
-  - **SABnzbd:** Declaratively configure usenet servers via 
-    `nixarr.sabnzbd.settings-sync.servers`.
 - **1984 DDNS** options.
 - **qBittorrent service** with VPN confinement support, [qui](https://github.com/autobrr/qui)
   WebUI (enabled by default), private tracker mode, Prometheus exporter, and
