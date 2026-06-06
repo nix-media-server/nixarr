@@ -64,6 +64,7 @@ Fixed:
 - qBittorrent `fix-permissions` now uses the correct download path.
 - Jellyfin authentication cleaned up: uses shared API key instead of creating
   a new device UUID per connection.
+- `nixarr.vpn.exposeOnLan` now exposes on all RFC 1918 private IP ranges.
 
 Removed:
 - Readarr and Readarr-audiobook, use shelfmark
