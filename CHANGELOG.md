@@ -64,6 +64,7 @@ Fixed:
 - qBittorrent `fix-permissions` now uses the correct download path.
 - Jellyfin authentication cleaned up: uses shared API key instead of creating
   a new device UUID per connection.
+- Sabnzbd: config now uses `nixarr` state directory instead of upstream default path `/var/lib`.
 
 Removed:
 - Readarr and Readarr-audiobook, use shelfmark
