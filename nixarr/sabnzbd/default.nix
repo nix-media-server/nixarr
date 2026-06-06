@@ -339,6 +339,7 @@ in {
           )
         );
     in {
+      systemd.services.sabnzbd.serviceConfig.ExecStart = lib.mkForce "${cfg.package}/bin/sabnzbd -d -f ${cfg.stateDir}/sabnzbd.ini";
       services.sabnzbd = {
         settings = {
           misc = {
