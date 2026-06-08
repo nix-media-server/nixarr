@@ -66,6 +66,7 @@ Fixed:
   a new device UUID per connection.
 - **Recyclarr v8 compatibility**: `--app-data` was removed in recyclarr v8.0.0
     in favor of `RECYCLARR_CONFIG_DIR` and `RECYCLARR_DATA_DIR` env vars.
+- `nixarr.vpn.exposeOnLan` now exposes on all RFC 1918 private IP ranges.
 
 Removed:
 - Readarr and Readarr-audiobook, use shelfmark
