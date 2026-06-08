@@ -225,9 +225,10 @@ in {
         description = ''
           Whether to allow direct LAN access to VPN-confined services. When
           enabled (default), services are accessible from the local network
-          (192.168.0.0/24 and 192.168.1.0/24). When disabled, services are
-          only accessible from localhost (127.0.0.1), which is useful when
-          using a reverse proxy like Caddy for all external access.
+          (all RFC 1918 private ranges: 10.0.0.0/8, 172.16.0.0/12,
+          192.168.0.0/16). When disabled, services are only accessible from
+          localhost (127.0.0.1), which is useful when using a reverse proxy
+          like Caddy for all external access.
 
           This is controlled by the VPN namespace firewall rules via the
           accessibleFrom configuration.
@@ -267,8 +268,9 @@ in {
         (
           if cfg.vpn.exposeOnLAN
           then [
-            "192.168.1.0/24"
-            "192.168.0.0/24"
+            "10.0.0.0/8"
+            "172.16.0.0/12"
+            "192.168.0.0/16"
             "127.0.0.1"
           ]
           else ["127.0.0.1"]

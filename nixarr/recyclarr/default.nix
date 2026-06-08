@@ -254,8 +254,13 @@ in {
     systemd.services.recyclarr = {
       requires = ["recyclarr-setup.service"];
       after = ["recyclarr-setup.service"];
+
       serviceConfig = {
-        ExecStart = lib.mkForce "${cfg.package}/bin/recyclarr sync --app-data ${cfg.stateDir} --config ${effectiveConfigFile}";
+        ExecStart = lib.mkForce "${cfg.package}/bin/recyclarr sync --config ${effectiveConfigFile}";
+        Environment = lib.mkForce [
+          "RECYCLARR_CONFIG_DIR=${cfg.stateDir}"
+          "RECYCLARR_DATA_DIR=${cfg.stateDir}"
+        ];
         EnvironmentFile = "${cfg.stateDir}/env";
         ReadWritePaths = [cfg.stateDir];
       };
