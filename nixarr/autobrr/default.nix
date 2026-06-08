@@ -211,9 +211,8 @@ in {
 
           # Create config with session secret
           SESSION_SECRET=$(cat "$SESSION_SECRET_FILE")
-          cp '${configTemplate}' "${cfg.stateDir}/config.toml"
+          ${pkgs.dasel}/bin/dasel query -i toml "{ $this..., sessionSecret: '$SESSION_SECRET' }" < '${configTemplate}' > "${cfg.stateDir}/config.toml"
           chmod 600 "${cfg.stateDir}/config.toml"
-          ${pkgs.dasel}/bin/dasel put -f "${cfg.stateDir}/config.toml" -v "$SESSION_SECRET" -o "${cfg.stateDir}/config.toml" "sessionSecret"
         '');
         ExecStart = lib.mkForce "${lib.getExe cfg.package} --config ${cfg.stateDir}";
         Restart = "on-failure";
