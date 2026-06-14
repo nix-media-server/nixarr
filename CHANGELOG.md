@@ -67,6 +67,7 @@ Fixed:
 - **Recyclarr v8 compatibility**: `--app-data` was removed in recyclarr v8.0.0
     in favor of `RECYCLARR_CONFIG_DIR` and `RECYCLARR_DATA_DIR` env vars.
 - `nixarr.vpn.exposeOnLan` now exposes on all RFC 1918 private IP ranges.
+- Sabnzbd: config now uses `nixarr` state directory instead of upstream default path `/var/lib`.
 
 Removed:
 - Readarr and Readarr-audiobook, use shelfmark

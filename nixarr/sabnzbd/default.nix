@@ -339,6 +339,7 @@ in {
           )
         );
     in {
+      systemd.services.sabnzbd.serviceConfig.BindPaths = ["${cfg.stateDir}:/var/lib/${config.services.sabnzbd.stateDir}"];
       services.sabnzbd = {
         settings = {
           misc = {
