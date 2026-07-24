@@ -7,7 +7,7 @@
     inherit (pkgs.python3Packages) buildPythonPackage setuptools;
   in
     buildPythonPackage {
-      pname = "nixarr";
+      pname = "nixarr-py";
       version = "0.1.0";
       pyproject = true;
 
