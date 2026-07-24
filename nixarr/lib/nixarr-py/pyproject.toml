@@ -1,5 +1,5 @@
 [project]
-name = "nixarr_py"
+name = "nixarr"
 version = "0.1.0"
 description = "Python clients and utilities for working with Nixarr services"
 
