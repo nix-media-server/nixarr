@@ -60,9 +60,7 @@ def make_request(
         "Content-Type": "application/x-www-form-urlencoded",
     }
 
-    # Bazarr's /api/system/settings handler reads only `request.form`, so the
-    # payload must be form-encoded. It also coerces booleans from the lowercase
-    # strings "true"/"false", which is not what str(bool) produces.
+    # Bazarr's settings endpoint reads only `request.form`.
     form_data = {
         k: str(v).lower() if isinstance(v, bool) else v for k, v in (data or {}).items()
     }
