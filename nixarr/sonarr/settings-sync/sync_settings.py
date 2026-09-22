@@ -26,6 +26,8 @@ class DownloadClient(pydantic.BaseModel):
 
 class SettingsSyncConfig(pydantic.BaseModel):
     download_clients: list[DownloadClient] = []
+    root_folders: list[str] = []
+    prune_root_folders: bool = False
 
     model_config = pydantic.ConfigDict(extra="forbid")
 
@@ -62,8 +64,31 @@ def sync_download_clients(
             dc_api.update_download_client(id=dc.id, download_client_resource=dc)
 
 
+def sync_root_folders(
+    root_folders: list[str], prune: bool, api_client: sonarr.ApiClient
+) -> None:
+    rf_api = sonarr.RootFolderApi(api_client)
+    existing = rf_api.list_root_folder()
+    existing_paths = {rf.path for rf in existing}
+    desired_paths = set(root_folders)
+
+    for path in root_folders:
+        if path in existing_paths:
+            continue
+        logger.info(f"Adding root folder '{path}'")
+        rf_api.create_root_folder(root_folder_resource=sonarr.RootFolderResource(path=path))
+
+    if not prune:
+        return
+    for rf in existing:
+        if rf.path not in desired_paths:
+            logger.info(f"Removing root folder '{rf.path}'")
+            rf_api.delete_root_folder(id=rf.id)
+
+
 def main(config: SettingsSyncConfig, api_client: sonarr.ApiClient) -> None:
     sync_download_clients(config.download_clients, api_client)
+    sync_root_folders(config.root_folders, config.prune_root_folders, api_client)
 
 
 if __name__ == "__main__":
