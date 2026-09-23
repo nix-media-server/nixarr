@@ -5,6 +5,7 @@ import logging
 import pathlib
 import urllib.request
 import urllib.error
+import urllib.parse
 
 import pydantic
 
@@ -56,10 +57,14 @@ def make_request(
     url = f"{base_url}/api{endpoint}"
     headers = {
         "X-API-KEY": api_key,
-        "Content-Type": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
     }
 
-    request_data = json.dumps(data).encode("utf-8") if data else None
+    # Bazarr's settings endpoint reads only `request.form`.
+    form_data = {
+        k: str(v).lower() if isinstance(v, bool) else v for k, v in (data or {}).items()
+    }
+    request_data = urllib.parse.urlencode(form_data).encode("utf-8") if data else None
     req = urllib.request.Request(url, data=request_data, headers=headers, method=method)
 
     try:
@@ -106,6 +111,7 @@ def sync_sonarr(
         "settings-sonarr-only_monitored": sonarr_config.sync_only_monitored_series,
         "settings-sonarr-series_sync": 60,
         "settings-sonarr-episodes_sync": 60,
+        "settings-general-use_sonarr": True,
     }
 
     save_settings(bazarr_base_url, bazarr_api_key, settings)
@@ -134,6 +140,7 @@ def sync_radarr(
         "settings-radarr-apikey": apikey,
         "settings-radarr-only_monitored": radarr_config.sync_only_monitored_movies,
         "settings-radarr-movies_sync": 60,
+        "settings-general-use_radarr": True,
     }
 
     save_settings(bazarr_base_url, bazarr_api_key, settings)
