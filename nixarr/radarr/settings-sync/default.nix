@@ -48,6 +48,33 @@ in {
         '';
       };
 
+      rootFolders = mkOption {
+        type = types.listOf types.str;
+        default = [];
+        example = ["/data/media/library/movies"];
+        description = ''
+          List of root folders to configure in Radarr.
+
+          Folders that don't already exist as a root folder in Radarr are
+          added; existing root folders are left untouched, unless
+          `pruneRootFolders` is enabled.
+        '';
+      };
+
+      pruneRootFolders = mkOption {
+        type = types.bool;
+        default = false;
+        example = true;
+        description = ''
+          Whether to remove root folders from Radarr that aren't listed in
+          `rootFolders`.
+
+          This only removes the root folder registration in Radarr; it
+          never deletes any files on disk, and movies already tracked under
+          the removed path stay in Radarr's library.
+        '';
+      };
+
       transmission = {
         enable = mkOption {
           type = types.bool;
@@ -113,7 +140,7 @@ in {
 
     systemd.services.radarr-sync-config = {
       description = ''
-        Sync Radarr configuration (download clients)
+        Sync Radarr configuration (download clients, root folders)
       '';
       after = wantedServices;
       wants = wantedServices;
@@ -126,6 +153,8 @@ in {
         ExecStart = let
           config-file = writeJSON "radarr-sync-config.json" {
             download_clients = cfg.downloadClients;
+            root_folders = cfg.rootFolders;
+            prune_root_folders = cfg.pruneRootFolders;
           };
         in ''
           ${getExe sync-settings} --config-file ${config-file}

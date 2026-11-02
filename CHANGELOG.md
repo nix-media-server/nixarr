@@ -12,10 +12,13 @@ Added:
     Lidarr, Readarr, Readarr-Audiobook, Whisparr), and tags. Use
     `nixarr.prowlarr.settings-sync` to configure. Set `enable-nixarr-apps = true`
     to automatically sync all enabled *Arrs.
-  - **Sonarr:** Declaratively configure download clients. Use
-    `nixarr.sonarr.settings-sync.transmission.enable = true` to automatically
-    add Transmission, or specify custom clients via `downloadClients`.
-  - **Radarr:** Same as Sonarr — declaratively configure download clients via
+  - **Sonarr:** Declaratively configure download clients and root folders.
+    Use `nixarr.sonarr.settings-sync` to configure.
+    Set `transmission.enable` to automatically add Transmission, or specify custom clients via `downloadClients`.
+    Use `rootFolders` to declare root folders. Optionally enable `pruneRootFolders = true` to also remove
+    root folders that fall out of the list (this only unregisters them in Sonarr, it never deletes files on disk).
+  - **Radarr:** Same as Sonarr, declaratively configure download clients
+    and root folders (with optional pruning) via
     `nixarr.radarr.settings-sync`.
   - **Bazarr:** Declaratively configure Sonarr/Radarr connections. Use
     `nixarr.bazarr.settings-sync.sonarr.enable = true` and

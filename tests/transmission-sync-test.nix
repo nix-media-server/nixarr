@@ -25,12 +25,19 @@ pkgs.testers.nixosTest {
 
       sonarr = {
         enable = true;
-        settings-sync.transmission.enable = true;
+        settings-sync = {
+          transmission.enable = true;
+          rootFolders = ["${config.nixarr.mediaDir}/library/shows"];
+        };
       };
 
       radarr = {
         enable = true;
-        settings-sync.transmission.enable = true;
+        settings-sync = {
+          transmission.enable = true;
+          rootFolders = ["${config.nixarr.mediaDir}/library/movies"];
+          pruneRootFolders = true;
+        };
       };
     };
   };
