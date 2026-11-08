@@ -71,6 +71,11 @@ Fixed:
 - `nixarr-py` build no longer fails `pythonMetadataCheckPhase` on recent
   nixpkgs: the derivation's `pname` now matches the `nixarr_py` distribution
   name declared in `pyproject.toml`.
+- Jellyfin sets `UMask = "0002"` in systemd, so the `.nfo` files and artwork it
+  writes into the library are group writable and the *Arrs can replace or
+  delete them on upgrade.
+- The Transmission download directories for Radarr, Sonarr and Lidarr are
+  created as 0775, so the *Arrs can remove the files they import from them.
 
 Removed:
 - Readarr and Readarr-audiobook, use shelfmark
