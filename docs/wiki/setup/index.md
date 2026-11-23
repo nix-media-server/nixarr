@@ -50,7 +50,8 @@ already set. See the following links for more info:
   - Under `Importing`, enable `Use Hardlinks instead of Copy`
   - Under `Permissions`, change `chmod Folder` to `775`
   - Under `Root Folders`, click `Add Root Folder`. Add
-  `/data/media/library/movies/`, then click `Save Changes`.
+  `/data/media/library/movies/`, then click `Save Changes`. This can also be
+  configured declaratively; see "Declarative Root Folders" below.
 - Go to "Settings" > "Download Clients" and add Transmission. Change the
   category to `radarr`.
 
@@ -58,6 +59,20 @@ already set. See the following links for more info:
 
 - Go to {URL}:7878/settings/mediamanagement and set `Unmonitor Deleted Movies`
   to true.
+
+### Declarative Root Folders
+
+Instead of manually adding root folders, you can configure them
+declaratively:
+
+```nix
+  nixarr.radarr.settings-sync = {
+    # Root folders are added if missing; existing ones are left untouched
+    # unless pruneRootFolders is also enabled
+    rootFolders = ["${config.nixarr.mediaDir}/library/movies"];
+    # pruneRootFolders = true;
+  };
+```
 
 ### Declarative Download Clients
 
@@ -99,7 +114,8 @@ To see available download client schemas, run:
   - Under `Importing`, enable `Use Hardlinks instead of Copy`
   - Under `Permissions`, change `chmod Folder` to `775`
   - Under `Root Folders`, click `Add Root Folder`. Add
-  `/data/media/library/shows/`, then click `Save Changes`.
+  `/data/media/library/shows/`, then click `Save Changes`. This can also be
+  configured declaratively; see "Declarative Root Folders" below.
 - Go to "Settings" > "Download Clients" and add Transmission. Change the
   category to `sonarr`.
 
@@ -107,6 +123,20 @@ To see available download client schemas, run:
 
 - Go to {URL}:8989/settings/mediamanagement and set `Unmonitor Deleted Episodes`
   to true.
+
+### Declarative Root Folders
+
+Instead of manually adding root folders, you can configure them
+declaratively:
+
+```nix
+  nixarr.sonarr.settings-sync = {
+    # Root folders are added if missing; existing ones are left untouched
+    # unless pruneRootFolders is also enabled
+    rootFolders = ["${config.nixarr.mediaDir}/library/shows"];
+    # pruneRootFolders = true;
+  };
+```
 
 ### Declarative Download Clients
 
