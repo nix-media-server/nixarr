@@ -337,9 +337,9 @@ in {
       "d '${nixarr.mediaDir}/torrents/.incomplete' 0755 ${globals.transmission.user} ${globals.transmission.group} - -"
       "d '${nixarr.mediaDir}/torrents/.watch'      0755 ${globals.transmission.user} ${globals.transmission.group} - -"
       "d '${nixarr.mediaDir}/torrents/manual'      0755 ${globals.transmission.user} ${globals.transmission.group} - -"
-      "d '${nixarr.mediaDir}/torrents/lidarr'      0755 ${globals.transmission.user} ${globals.transmission.group} - -"
-      "d '${nixarr.mediaDir}/torrents/radarr'      0755 ${globals.transmission.user} ${globals.transmission.group} - -"
-      "d '${nixarr.mediaDir}/torrents/sonarr'      0755 ${globals.transmission.user} ${globals.transmission.group} - -"
+      "d '${nixarr.mediaDir}/torrents/lidarr'      0775 ${globals.transmission.user} ${globals.transmission.group} - -"
+      "d '${nixarr.mediaDir}/torrents/radarr'      0775 ${globals.transmission.user} ${globals.transmission.group} - -"
+      "d '${nixarr.mediaDir}/torrents/sonarr'      0775 ${globals.transmission.user} ${globals.transmission.group} - -"
       "d '${nixarr.mediaDir}/torrents/shelfmark'   0755 ${globals.transmission.user} ${globals.transmission.group} - -"
     ];
 

@@ -191,6 +191,10 @@ in {
     # Always prioritise Jellyfin IO
     systemd.services.jellyfin.serviceConfig.IOSchedulingPriority = 0;
 
+    # Set UMask to 0002 so the .nfo files and artwork Jellyfin writes into the
+    # library are group writable (664), letting the *arrs replace or delete them
+    systemd.services.jellyfin.serviceConfig.UMask = lib.mkForce "0002";
+
     services.jellyfin = {
       enable = cfg.enable;
       package = cfg.package;
